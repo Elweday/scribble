@@ -10,6 +10,15 @@ import { getUrl, transformer } from "./shared";
 
 export const api = createTRPCReact<AppRouter>();
 
+import { createWSClient } from '@trpc/client';
+import { wsLink } from '@trpc/client/links/wsLink';
+
+// create persistent WebSocket connection
+const wsClient = createWSClient({
+  url: `ws://localhost:3001`,
+});
+
+
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
@@ -17,6 +26,10 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
     api.createClient({
       transformer,
       links: [
+        wsLink({
+          client: wsClient,
+        }),
+    
         loggerLink({
           enabled: (op) =>
             process.env.NODE_ENV === "development" ||

@@ -1,20 +1,39 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@index([name])
+model Game {
+  gameId           String   @id
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  public       Boolean  @default(false)
+  gameStarted  Boolean
+  remainingTime Int
+  currentRound Int
+  currentWord  String
+  currentScreen String
+  drawingPlayerIndex Int
+  hints Int
+  maxPlayers Int
+  rounds Int
+  drawingTime Int
+  players Player[]
 }
+
+model Player {
+  id         String
+  name       String
+  avatar     String
+  game       Game?     @relation(fields: [gameId], references: [gameId])
+  gameId     String?
+  score      Int?
+  lastUpdate DateTime? @updatedAt
+
+  @@id([id])
+}
+
