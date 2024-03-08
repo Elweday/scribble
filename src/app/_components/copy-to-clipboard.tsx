@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-export default function ({ copyText,  }: { copyText: string }) {
+export default function ({ copyText }: { copyText: string }) {
     const [isCopied, setIsCopied] = useState(false);
     const copy = () => {
       navigator.clipboard.writeText(copyText);

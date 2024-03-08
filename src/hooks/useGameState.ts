@@ -25,13 +25,24 @@ function calculateScores(game: State) {
 const stateAtom = atom<State>({
   public: false,
   gameId: "",
-  gameStarted: false,
+  gameStarted: true,
   remainingTime: 0,
   currentRound: 0,
   currentWord: "",
   currentScreen: "LOBBY",
   drawingPlayerIndex: 0,
-  players: [],
+  players: [{
+    name: "nasser",
+    score: 720,
+    avatar: "Cuddles",
+    guessed: false
+  }, 
+  {
+    name: "ahmed",
+    score: 350,
+    avatar: "cuddles",
+    guessed: false
+  }],
   hints: 3, 
   maxPlayers: 3,
   rounds: 3,

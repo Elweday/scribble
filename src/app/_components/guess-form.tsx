@@ -1,24 +1,27 @@
 "use client";
 import { useState } from "react";
+import { ActorContext } from "~/useGame";
 
 import { api } from "~/trpc/react";
 type Props = {
-  gameId: string
   guesser: {
     name: string, 
     avatar: string
   }
 } 
 
-export default function GuessForm({gameId, guesser}: Props) {
+export default function GuessForm({guesser}: Props) {
   const [body, setBody] = useState("");
-  const { mutate: guess, isLoading} = api.guess.mutation.useMutation({onSuccess: () => setBody("")});
+  const send = ActorContext.useActorRef().send;
+
+  
+  // const { mutate: guess, isLoading} = api.guess.mutation.useMutation({onSuccess: () => setBody("")});
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        guess({ channel: gameId, guess: body, userId: guesser.name, correct: false });
+        send({type: "guess", word: body, player_id: 0});
         setBody("");
       }}
       className="flex gap-2"
@@ -33,9 +36,8 @@ export default function GuessForm({gameId, guesser}: Props) {
       <button
         type="submit"
         className="rounded-full bg-white/10 p-2 size-11 aspect-square  place-content-center place-items-center flex font-semibold transition hover:bg-white/20"
-        disabled={isLoading}
       >
-        {isLoading ?
+         {false ?
 
         (
            <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -45,7 +47,7 @@ export default function GuessForm({gameId, guesser}: Props) {
         : (
            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 20v-6l8-2l-8-2V4l19 8z"/></svg>
          )}
-      </button>
+       </button>
     </form>
   );
 }

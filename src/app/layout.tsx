@@ -1,15 +1,16 @@
 import "~/styles/globals.css";
 
-import { Inter } from "next/font/google";
+import { Nunito } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { Provider as JotaiProvider } from "jotai";
+import { GameProvider } from "~/useGame";
 
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
+
+
+
+const font = Nunito({ subsets: ["latin"], variable: "--font-family", weight: ["300", "400", "500", "700"] });
 
 export const metadata = {
   title: "Scribble Clone",
@@ -24,11 +25,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable} bg-gradient-to-b from-[#66026d] to-[#13162c] text-white max-h-screen max-w-screen  lg:p-16 p-2 w-screen h-screen overflow-hidden`}>
+      <body className={`font-sans ${font.variable} bg-gradient-to-b from-[#66026d] to-[#13162c] text-white   lg:p-16 p-2 h-screen w-full  overflow-hidden`}>
         <TRPCReactProvider>
+        <GameProvider>
           <JotaiProvider>
             {children}
           </JotaiProvider>
+          </GameProvider>
         </TRPCReactProvider>
       </body>
     </html>

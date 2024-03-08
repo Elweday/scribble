@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const GAME_ID_LENGTH = 10;
+// convert this type to zod 
 
 export const COLOR_PALETTE  = [
     "#000000",

@@ -1,27 +1,17 @@
-import { EventEmitter } from "events";
+import { EventEmitter as UntypedEventEmitter } from "events";
 
-type CreateTypedEventEmitter<Schema extends Record<string, any>> = {
-    emit<K extends string & keyof Schema>(evtName: K, payload: Schema[K]): void;
-    on<K extends string & keyof Schema>(evtName: K, listener: (payload: Schema[K]) => void): void;
-    off<K extends string & keyof Schema>(evtName: K, listener: (payload: Schema[K]) => void): void;
-};
-
-export function TypedEventEmitter<Schema>(): CreateTypedEventEmitter<Schema> {
-    const ee = new EventEmitter();
-    return {
-        emit: (evtName, payload) => {
-            ee.emit(evtName, payload);
-        },
-        on: (evtName, listener) => {    
-            ee.on(evtName, listener);
-        },
-        off: (evtName, listener) => {           
-            ee.off(evtName, listener);
-        }
-        
+class EventEmitter<S extends Record<string, any>> {
+    private ee = new UntypedEventEmitter();
+    emit<K extends string & keyof S>(evtName: K, payload: S[K]) {
+        this.ee.emit(evtName, payload);
+    };
+    on<K extends string & keyof S>(evtName: K, listener: (payload: S[K]) => void) {
+        this.ee.on(evtName, listener);
+    };
+    off<K extends string & keyof S>(evtName: K, listener: (payload: S[K]) => void){
+        this.ee.off(evtName, listener);
     };
 }
-
 
 type Schema = {
     message: {
@@ -34,5 +24,3 @@ type Schema = {
         players: string[];
     }
 }
-
-

@@ -6,7 +6,7 @@ const SCREENS = ["LOBBY", "DRAWING", "WORD_CHOOSING", "SCORES", "END"] as const;
 
 export const stateSchema = z.object({
     public: z.boolean().default(false),
-    gameId: z.string(),
+    gameId: z.string().length(10),
     gameStarted : z.boolean(),
     remainingTime: z.number(), 
     currentRound: z.number(),

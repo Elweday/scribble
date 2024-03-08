@@ -5,23 +5,19 @@ import { Action } from "~/constants/draw";
 import Toolbar from "./toolbar";
 import { cn } from "~/utils/cn";
 import { api } from "~/trpc/react";
+import { ActorContext } from "~/useGame";
 
 interface Props {
   isMyTurn: boolean,
-  gameId: string
 }
 const Canvas = (props: Props) => {
-  const {isMyTurn, gameId} = props
+  const gameState = ActorContext.useSelector(state => state);
+
+  const {isMyTurn} = props
   const min = 20;
   const max = 100;
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const drawMutation = api.draw.mutation.useMutation()
-  const serverDispatch = (action: Action) => {
-    return drawMutation.mutate({
-      ...action,
-      gameId
-    })
-  }
+
 
   const [state, clientDispatch] = useCanvas(canvasRef, {
     color: "#000000",
@@ -34,14 +30,7 @@ const Canvas = (props: Props) => {
   });
   const dispatch = (action: Action) => {
     clientDispatch(action);
-    serverDispatch(action);
   };
-
-  api.draw.subscription.useSubscription({gameId}, {
-    onData: (data) => {
-      clientDispatch(data);
-    },
-  })
 
 
 type ME = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
@@ -91,6 +80,7 @@ const dispatchers = !isMyTurn? {}:  {
     };
 
     useLayoutEffect(() => {
+      
     const canvas = canvasRef.current as HTMLCanvasElement;
     const { width, height } = canvas.getBoundingClientRect()
     const ctx = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
@@ -100,7 +90,7 @@ const dispatchers = !isMyTurn? {}:  {
 
   return (
 
-      <div className="relative flex h-full w-full aspect-video">
+      <div className="relative flex h-full w-full aspect-video max-h-[40rem]">
         {isMyTurn ? (
           <Toolbar state={state} dispatch={dispatch} min={min} max={max}/>
         ):null}

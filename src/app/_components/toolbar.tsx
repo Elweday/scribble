@@ -31,7 +31,7 @@ export default  (props : Props) => {
     </button>
     {COLOR_PALETTE.map((color, index) => (
       <button
-        className="transition-all hover:scale-110"
+        className="transition-all hover:scale-110 z-50"
         key={index}
         style={{ backgroundColor: color }}
         onClick={() => dispatch({ type: "COLOR", payload: { color } })}

@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { cn } from "~/utils/cn";
 import { useGameState } from "~/hooks/useGameState";
-
+import { AvatarSwitcher } from "./avatat_switcher";
+import { ActorContext } from "~/useGame";
 
 interface Props {
     client: string 
@@ -14,9 +15,10 @@ export default function NameForm({client}: Props) {
 
     const [name, setName] = useState("");
     const [isPublic, setIsPublic] = useState(true); 
-    const { dispatch, game } = useGameState()
+    const state = ActorContext.useSelector(state => state);
+    const send = ActorContext.useActorRef().send
     
-    const createRoomMutation = api.room.create.useMutation({
+    /* const createRoomMutation = api.room.create.useMutation({
         onSuccess: (data) => {
             const {gameId} = data
             const players = [{
@@ -27,18 +29,19 @@ export default function NameForm({client}: Props) {
             }]
             dispatch({type: "GAME_CREATE", payload: {gameId, public: isPublic, gameStarted: false, players}})
         }
-    })
+    }) */
     const createRoom = (e: any) => {
         e.preventDefault()
-        const gameId = Math.random().toString(36).substring(2, 12)
-        createRoomMutation.mutate({gameId, public: isPublic, playerId: client})
+        const gameId = Math.random().toString(36).substring(2, 12);
+        send({type: "join",  name, avatar: "alien"})
+
         window.location.href = window.location.href + `/${gameId}`  
     }
-    const addToRoom = (e: any) => {
+/*     const addToRoom = (e: any) => {
         e.preventDefault()
         dispatch({type: "CUSTOM",  payload: { gameId: game.gameId, players: [{name, avatar: "", score: 0, guessed: false}]}})
     }
-    
+ */    
     useEffect(() => {
         const storedName = window.localStorage.getItem("name")
         if (storedName) setName(storedName)
@@ -53,23 +56,16 @@ export default function NameForm({client}: Props) {
 
         <input value={name} onChange={(e) => setName(e.target.value)} className="text-md block w-full justify-self-center rounded-lg border border-gray-300 border-opacity-40  bg-black/10 px-[0.75rem] py-[0.32rem] indent-2 placeholder:italic placeholder:text-slate-400/80 focus:border-skin-accent focus:outline-none" type="text" name="name" id="rounds" placeholder="Your name" required />
         <div className="flex place-items-center place-content-center">
-        <svg className="size-6 lg:size-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-	<path fill="currentColor" d="M685.248 104.704a64 64 0 0 1 0 90.496L368.448 512l316.8 316.8a64 64 0 0 1-90.496 90.496L232.704 557.248a64 64 0 0 1 0-90.496l362.048-362.048a64 64 0 0 1 90.496 0"></path>
-</svg>
-            <img className="lg:size-36 size-20 place-self-center" src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${"Cuddles"}`} alt="avatar" />
-        <svg xmlns="http://www.w3.org/2000/svg" className="rotate-180 size-6 lg:size-10" viewBox="0 0 1024 1024">
-	<path fill="currentColor" d="M685.248 104.704a64 64 0 0 1 0 90.496L368.448 512l316.8 316.8a64 64 0 0 1-90.496 90.496L232.704 557.248a64 64 0 0 1 0-90.496l362.048-362.048a64 64 0 0 1 90.496 0"></path>
-</svg>
+        <AvatarSwitcher />
         </div>
         <div className="flex flex-col w-full gap-2 place-content-center place-items-stretch">
             
         <button     className="px-4 py-4 rounded-lg bg-green-700 hover:bg-green-800 hover:scale-[1.02] transition-all">Start Game</button>
         <div className="flex flex-row  gap-2 place-content-center place-items-center">
         <button onClick={createRoom} className="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 hover:scale-[1.02] transition-all w-full">Create Room!</button>
-        <button onClick={addToRoom} className="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 hover:scale-[1.02] transition-all w-full">Add Player To room</button>
         <label className=" w-fit inline-flex items-center cursor-pointer">
         <input onChange={() => setIsPublic(!isPublic)} type="checkbox" value="" className="sr-only peer group" />
-                <span className=" flex place-items-center place-content-center inset-0 peer-checked:border-white  peer-checked:bg-green-400/30 bg-red-400/30   rounded-full lg:size-12 size-9 transition-all  *:text-red-400  *:peer-checked:text-green-400" >
+                <span className=" flex place-items-center place-content-center inset-0 peer-checked:border-white  peer-checked:bg-green-400/30 bg-red-400/30   rounded-md lg:size-12 size-10 transition-all  *:text-red-400  *:peer-checked:text-green-400" >
                 <svg className={cn("size-full p-2 text-inherit ") } xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24">
                     {
                         isPublic ? (

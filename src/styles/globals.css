@@ -2,36 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --primary: #007bff;
+  --primary-darker: #0062cc;
+  --primary-lighter: #0062cc;
+  --color-1: #66026d;
+  --color-1-2 : #68046f;
+  --color-2: #13162c;
+}
 
 input[type="range"] {
-    -webkit-appearance: none;
-    appearance: none;
-    background: transparent;
-    cursor: pointer;
-    margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  margin: 0;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #053a5f;
+  height: 1.3rem;
+  border-radius: 10px
+
+}
+input[type="range"]::-moz-range-track{
+  background: #053a5f;
+  height: 1.3rem;
+  border-radius: 10px
+}
+::-webkit-scrollbar {
+    width: 0.25rem;
+    height: 0.5rem;
+}
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background-color: rgba( 0, 0, 0, 0.3);
   }
 
-  input[type="range"]::-webkit-slider-runnable-track {
-    background: #053a5f;
-    height: 1.3rem;
-    border-radius: 10px
-
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: var(--color-1);
   }
-  input[type="range"]::-moz-range-track{
-    background: #053a5f;
-    height: 1.3rem;
-    border-radius: 10px
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    border-radius: 10px;
+    background-color: var(--color-1-2);
   }
-  
-
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none; /* Override default look */
-    appearance: none;
-    background-color: #5cd5eb;
-    height: 1.3rem;
-    width: 1rem; 
-    border-radius: 20px;
-   
- }
-
-

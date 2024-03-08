@@ -1,20 +1,35 @@
 "use client";
 import { api } from "~/trpc/react";
 import { useState } from "react";
-import { useGameState } from "~/hooks/useGameState";
-import { type State as Game } from "~/constants/game";
+import { cn } from "~/utils/cn";
+import { avatars, Avatar } from "~/machine";
+type FormData = {
+  maxPlayers: number,
+  rounds: number,
+  roundTime: number,
+  hints: number
+}
 
-type FormData = Pick<Game, "hints" | "maxPlayers" | "rounds" | "drawingTime">
+import { ActorContext } from "~/useGame";
 
+const randomAvatar = () => {
+  const idx = Math.random() * avatars.length;
+  return avatars[Math.floor(idx)] as Avatar;
+}
 
+const getRandomUser = () => {
+  return `user${Math.floor(Math.random() * 50)}`;
 
-export default () => {
-  const {dispatch, game} = useGameState()
+}
+
+export default (props: {gameId: string}) => {
+  const state = ActorContext.useSelector(state => state);
+  const send = ActorContext.useActorRef().send;
   const [formData, setFormData] = useState<FormData>({
-    hints: 1,
     maxPlayers: 8,
     rounds: 3,
-    drawingTime:30,
+    roundTime:30,
+    hints: 0
   })
 
   const onChangeMaker = (property: keyof FormData )=>{
@@ -25,6 +40,9 @@ export default () => {
 
   return (
     <form className="grid grid-cols-2 gap-3 w-full ">
+            <button className="bg-red-500 p-3 rounded-lg" onClick={(e) => {
+              e.preventDefault();
+              send({type: "join",  name: getRandomUser(), avatar: randomAvatar()})}}>Add Player</button>
       <h1 className="col-span-2 lg:text-xl">Settings</h1>
 
       <label className="relative">
@@ -99,8 +117,8 @@ export default () => {
           max={180}
           step={30}
           required
-          onChange={onChangeMaker("drawingTime")}
-          value={formData.drawingTime}
+          onChange={onChangeMaker("roundTime")}
+          value={formData.roundTime}
         />
       </label>
 
@@ -130,19 +148,16 @@ export default () => {
         />
       </label>
       <button
+      disabled={state.context.players.length < 2}
         onClick={(e) => {
           e.preventDefault();
-          const players = [{
-            name: "Ahmed",
-            avatar: "cuddles",
-            score: 0,
-            guessed: false
-          }];
-          dispatch({ type: "START_GAME", payload: {...formData, players: players} });
+          send({ type: "start_game", ...formData, gameId: props.gameId });
         }}
-        className="col-span-2 rounded-lg bg-green-700 px-4 py-4 transition-all hover:scale-[1.02] hover:bg-green-800"
+        className={cn("col-span-2 rounded-lg bg-green-700 px-4 py-4 transition-all hover:scale-[1.02] hover:bg-green-800", {
+          "cursor-not-allowed bg-red-700 hover:bg-red-800": state.context.players.length < 2,
+        })}
       >
-        Start
+        { state.context.players.length < 2 ? "Not enough players" : "Start"}
       </button>
     </form>
   );
