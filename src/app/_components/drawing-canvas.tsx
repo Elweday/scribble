@@ -4,21 +4,13 @@ import { useCanvas } from "~/hooks/useCanvas";
 import { Action } from "~/constants/draw";
 import Toolbar from "./toolbar";
 import { cn } from "~/utils/cn";
-import { api } from "~/trpc/react";
-import { ActorContext } from "~/useGame";
+import { useGameSyncedStore } from "~/data/gameStore";
 
-interface Props {
-  isMyTurn: boolean,
-}
-const Canvas = (props: Props) => {
-  const gameState = ActorContext.useSelector(state => state);
-
-  const {isMyTurn} = props
-  const min = 20;
-  const max = 100;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-
+const Canvas = () => {
+    const {is} = useGameSyncedStore()  
+    const min = 20;
+    const max = 100;
+    const canvasRef = useRef<HTMLCanvasElement>(null);
   const [state, clientDispatch] = useCanvas(canvasRef, {
     color: "#000000",
     width: Number(min),
@@ -36,7 +28,7 @@ const Canvas = (props: Props) => {
 type ME = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
 type TE = React.TouchEvent<HTMLCanvasElement>;
   
-const dispatchers = !isMyTurn? {}:  {
+const dispatchers = !(is("myturn"))? {}:  {
 
     onMouseDown: (e: ME) => {
       e.preventDefault();
@@ -91,12 +83,12 @@ const dispatchers = !isMyTurn? {}:  {
   return (
 
       <div className="relative flex h-full w-full aspect-video max-h-[40rem]">
-        {isMyTurn ? (
+        {is("myturn") ? (
           <Toolbar state={state} dispatch={dispatch} min={min} max={max}/>
         ):null}
         <canvas
           className={cn(" w-full h-full cursor-crosshair aspect-video  rounded-lg", {
-            "cursor-not-allowed": !isMyTurn
+            "cursor-not-allowed": !is("myturn")
           })}
           {...dispatchers}
           ref={canvasRef}

@@ -1,18 +1,18 @@
 "use client";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog"
 import { useState, useEffect, useContext } from "react";
-import { ActorContext } from "~/useGame";
 import { Avatar } from "./avatar";
 import { cn } from "~/utils/cn";
+import { useGameSyncedStore } from "~/data/gameStore";
+
 
 
 
 
 export default function Leaderboard() {
-    const state = ActorContext.useSelector(state => state);
-    const send = ActorContext.useActorRef().send;
-
-    return (
+  const {state, send} = useGameSyncedStore();
+  const players = Object.entries(state.context?.players)
+  return (
     <Dialog open={true}>
       <DialogContent className="z-[999] p-5 w-[80%] rounded bg-purple-950/80">
         <DialogHeader>
@@ -25,13 +25,13 @@ export default function Leaderboard() {
             <div className=" space-y-0 ">
               
               <p>
-                ({state.context.players.filter(player => player.guessed).length} / {state.context.players.length})
-                The word was <span className="font-bold text-purple-200"> {state.context.currentWord} </span> 
+                ({players.map(([_, player]) => player.guessed).length} / {players.length})
+                The word was <span className="font-bold text-purple-200"> {state.context?.currentWord} </span> 
               </p>
 
             </div>
             <div className="grid grid-cols-3 gap-2">
-                {state.context.players.sort((a, b) => b.score - a.score).map((player, index) => (
+                {players.sort(([i1, a], [i2, b]) => b.score - a.score).map(([id, player], index) => (
                   <div className={cn("flex gap-3 place-items-center place-content-center text-center justify-center ", {
                     "col-span-3": index < 1,
                   })} key={index}>
@@ -45,7 +45,7 @@ export default function Leaderboard() {
                 ))}
             </div>
             </div>
-            {state.matches("Game over") && 
+            {state.value == "done" && 
               <button className="rounded-md bg-white/10 py-2 px-3 place-content-center place-items-center flex font-semibold transition hover:bg-white/20 hover:scale-[1.02]" onClick={() => send({type: "restart_game"})}>Play Again!</button>
             }
 

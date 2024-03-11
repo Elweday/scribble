@@ -1,15 +1,20 @@
-import {useState, useEffect} from 'react'
-export function useLocalStorage<T>( key: string, initialValue: T) {
-    const [state, setState] = useState<T | null>(() => {
-    const json = localStorage.getItem(key);
-    if (json != null) return JSON.parse(json);
-    return initialValue;
+import { useState, useEffect } from "react";
+
+
+const prefix = "SCRIBBLE_";
+export function useLocalStorage<T>(key: string, defaultValue: string) : [T, (v: T) => void] {
+  const [value, setValue] = useState<T>(() => {
+    if (typeof window === "undefined") return defaultValue as T;
+    const saved = window.localStorage.getItem(prefix+key);
+    if (saved) {
+      return JSON.parse(saved) as T;
+    }
+    return defaultValue as T;
   });
 
   useEffect(() => {
-    if (state === null) return;
-    localStorage.setItem(key, JSON.stringify(state));
-  }, [state]);
+    window.localStorage.setItem(prefix+key, JSON.stringify(value));
+  }, [key, value]);
 
-  return [state, setState];
-}
+  return [value, setValue];
+};

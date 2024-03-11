@@ -1,13 +1,9 @@
 
-import { ActorContext } from "~/useGame";
-type Props = {
-    correct: string
-    isMyTurn: boolean
-}
+import { useGameSyncedStore } from "~/data/gameStore";
 
-export const TopBar = (props : Props) => {
-    const state = ActorContext.useSelector(state => state);
-    const {isMyTurn} = props
+
+export const TopBar = () => {
+    const {state, is} = useGameSyncedStore()
     const rounds = state.context.rounds;
     const played = rounds - state.context.roundsLeft;
 
@@ -19,7 +15,7 @@ export const TopBar = (props : Props) => {
             </span>
             <span className="flex flex-wrap lg:gap-2 gap-1 place-content-center place-items-center"> 
                 {
-                    state.context.currentWord.split("").map((letter, index) => <span className="text-lg lg:text-3xl  bg-black/10  size-7 lg:size-10 text-center rounded-md  " key={index}>{isMyTurn ? letter : ""}</span>)
+                    state.context.currentWord?.split("").map((letter, index) => <span className="text-lg lg:text-3xl  bg-black/10  size-7 lg:size-10 text-center rounded-md  " key={index}>{is("myturn") ? letter : " "}</span>)
                 }
             </span>
             <span className="font-bold lg:text-2xl ">{played} / {rounds}</span>

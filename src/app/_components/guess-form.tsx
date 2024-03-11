@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
-import { ActorContext } from "~/useGame";
-
+import { useGameSyncedStore } from "~/data/gameStore";
 import { api } from "~/trpc/react";
 type Props = {
   guesser: {
@@ -10,10 +9,9 @@ type Props = {
   }
 } 
 
-export default function GuessForm({guesser}: Props) {
+export default function GuessForm() {
   const [body, setBody] = useState("");
-  const send = ActorContext.useActorRef().send;
-
+  const {send, me} = useGameSyncedStore()
   
   // const { mutate: guess, isLoading} = api.guess.mutation.useMutation({onSuccess: () => setBody("")});
 
@@ -21,7 +19,7 @@ export default function GuessForm({guesser}: Props) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        send({type: "guess", word: body, player_id: 0});
+        send({type: "guess", word: body, id: me});
         setBody("");
       }}
       className="flex gap-2"

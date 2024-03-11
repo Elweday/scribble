@@ -1,66 +1,32 @@
 "use client";
 import { useState, useEffect } from "react";
-import { api } from "~/trpc/react";
 import { cn } from "~/utils/cn";
-import { useGameState } from "~/hooks/useGameState";
 import { AvatarSwitcher } from "./avatat_switcher";
-import { ActorContext } from "~/useGame";
+import { useLocalStorage } from "~/hooks/useLocalStorage";
+import { AvatarName } from "~/constants/avatars";
+import { useRouter } from 'next/navigation'
+import { useGameSyncedStore } from "~/data/gameStore";
+import EditForm from "./edit-form";
 
-interface Props {
-    client: string 
-}
 
-
-export default function NameForm({client}: Props) {
-
-    const [name, setName] = useState("");
+export default function NameForm() {
+    const [name, setName] = useLocalStorage<string>("NAME", "Guest");
+    const [avatar, setAvatar] = useLocalStorage<AvatarName>("AVATAR", "batman");
     const [isPublic, setIsPublic] = useState(true); 
-    const state = ActorContext.useSelector(state => state);
-    const send = ActorContext.useActorRef().send
-    
-    /* const createRoomMutation = api.room.create.useMutation({
-        onSuccess: (data) => {
-            const {gameId} = data
-            const players = [{
-                name,
-                avatar: "",
-                score: 0,
-                guessed: false
-            }]
-            dispatch({type: "GAME_CREATE", payload: {gameId, public: isPublic, gameStarted: false, players}})
-        }
-    }) */
+    const { send }= useGameSyncedStore();
+    const router = useRouter();
     const createRoom = (e: any) => {
         e.preventDefault()
         const gameId = Math.random().toString(36).substring(2, 12);
-        send({type: "join",  name, avatar: "alien"})
-
-        window.location.href = window.location.href + `/${gameId}`  
+        send({type: "join", name, avatar, roomId: gameId })
+        typeof window !== 'undefined' && router.push(`/${gameId}`)
     }
-/*     const addToRoom = (e: any) => {
-        e.preventDefault()
-        dispatch({type: "CUSTOM",  payload: { gameId: game.gameId, players: [{name, avatar: "", score: 0, guessed: false}]}})
-    }
- */    
-    useEffect(() => {
-        const storedName = window.localStorage.getItem("name")
-        if (storedName) setName(storedName)
-    }, []);
-
-    useEffect(() => {
-        window.localStorage.setItem("name", name)
-    }, [name]);
-
     return (
+        
         <div className="flex flex-col gap-5">
-
-        <input value={name} onChange={(e) => setName(e.target.value)} className="text-md block w-full justify-self-center rounded-lg border border-gray-300 border-opacity-40  bg-black/10 px-[0.75rem] py-[0.32rem] indent-2 placeholder:italic placeholder:text-slate-400/80 focus:border-skin-accent focus:outline-none" type="text" name="name" id="rounds" placeholder="Your name" required />
-        <div className="flex place-items-center place-content-center">
-        <AvatarSwitcher />
-        </div>
         <div className="flex flex-col w-full gap-2 place-content-center place-items-stretch">
-            
-        <button     className="px-4 py-4 rounded-lg bg-green-700 hover:bg-green-800 hover:scale-[1.02] transition-all">Start Game</button>
+        <EditForm />
+        <button className="px-4 py-4 rounded-lg bg-green-700 hover:bg-green-800 hover:scale-[1.02] transition-all">Start Game!</button>
         <div className="flex flex-row  gap-2 place-content-center place-items-center">
         <button onClick={createRoom} className="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 hover:scale-[1.02] transition-all w-full">Create Room!</button>
         <label className=" w-fit inline-flex items-center cursor-pointer">

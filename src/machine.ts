@@ -1,101 +1,16 @@
-import { setup, assign, or, forwardTo, fromCallback, SendToAction } from "xstate";
-import { io } from "socket.io-client";
-export const socket = io('http://localhost:5665');
+import { setup, assign, or, forwardTo, fromCallback, sendTo, log } from "xstate";
+import { avatars, AvatarName } from "./constants/avatars";
+import {Event, Context, Player} from "./types"
 
-export const avatars = ["afro-boy",
-"afro-female",
-"afro-male",
-"alien",
-"arab",
-"avocado",
-"baby",
-"batman",
-"bear",
-"boy-2",
-"boy",
-"breaking-bad",
-"bug",
-"builder",
-"cactus",
-"chaplin",
-"coffe",
-"crying",
-"dead",
-"draw-love",
-"einstein",
-"emo",
-"fighter",
-"gangsta",
-"ghost",
-"girl-2",
-"girl-3",
-"girl-4",
-"girl",
-"grandma",
-"halloween",
-"hindi",
-"hipster",
-"japanese",
-"joker",
-"kid-girl",
-"kid-indian",
-"male-2",
-"male-3",
-"male-indian",
-"male-old",
-"marilyn",
-"muslim",
-"nun",
-"pilot",
-"sheep",
-"sick",
-"sloth",
-"xmas"] as const;
+const LOCAL_EVENTS: Event["type"][] = ["set_me"] 
 
-type Guess = {
-    word: string;
-    playerName: string;
-    avatar: string;
-}
-
-type Player = {
-    id: string;
-    name: string;
-    avatar: Avatar;
-    score: number;
-    guessed: boolean;  
-    drawingRating?: number;
-    timeStamp?: number;
-}
-    
-type Context = {
-    gameId: string;
-    players: Player[];
-    roundsLeft: number;
-    currentWord: string;
-    currentDrawerIndex: number;
-    remainingTime: number;
-    roundTime: number;
-    rounds: number;
-    guesses: Guess[];
-    wordOptions: string[];
-    maxPlayers: number;
-    hints: number;
-} 
 
 export type Avatar = typeof avatars[number]
 
-
-let playerId = 0;
-
-type Event = 
-| { type: "guess"; word: string; id: string }
-| { type: "start_game"; gameId: string; roundTime: number; rounds: number; maxPlayers: number; hints: number}
-| { type: "word_chosen"; word: string }
-| { type: "restart_game" }
-| { type: "join"; id: string; name: string; avatar: Avatar }
-| { type: "rate_drawing"; rating: number; player_id: number }
-| { type: "leave"; id: string }
+const randomAvatar = () => {
+  const idx = Math.floor(Math.random() * avatars.length)
+  return avatars[idx]
+}
 
 const machineSetup = setup({
   types: {
@@ -103,33 +18,21 @@ const machineSetup = setup({
     events: {} as Event,
   },
   delays: {
-    choose_word_duraton: 5000
+    choose_word_duration: 5000,
+    leaderboard_duration: 5000,
   },  
-  actors: {
-    ws: fromCallback(({sendBack, self, receive}) => {
-      socket.on('connect', () => {
-        socket.emit('join', { id:socket.id, name: socket.id, avatar: "afro-male" });
-      })
-      socket.on('disconnect', () => {
-        socket.emit('leave', { id:socket.id });
-      })
-      socket.on('user-joined', (data) => {
-        sendBack({ type: "join", name: data.name, avatar: data.avatar })
-      })
 
-      socket.on('user-left', (data) => {
-        sendBack({ type: "leave", id: data.id })
-      })
-      
-      socket.on('load_players', (players) => {
-        players.forEach((player: { id: string, name: string, avatar: string }) => {
-          sendBack({ type: "join", name: player.name, avatar: player.avatar }, );
-        })
-      });
-
-    })
-  },
   actions: {
+
+    set_me: assign(({ context, event }) => {
+        if (event.type === "set_me") {
+            return {
+                ...context,
+                me: event.id,
+            }
+        }
+      return context
+    }),
     start_game: assign(({ context, event }) => {
         if (event.type === "start_game") {
             return {
@@ -166,13 +69,18 @@ const machineSetup = setup({
       }
     }),
     remove_options: assign({ wordOptions: () => []}),
-    add_player: assign({
-      players: ({ context, event }) => {
-        if (event.type === "join") {
-          return [...context.players, { id: event.id, name: event.name, avatar: event.avatar, score: 0, guessed: false }];
+
+    add_player: assign(({ context, event })=>{
+      if (event.type === "join") {
+        const player = { id: event.id, name: event.name, avatar: event.avatar, score: 0, guessed: false };
+        return {
+          ...context,
+          players: [...context.players, player],
+          owner: context.owner ? context.owner : event.id
         }
-        return context.players;
-      },
+      }
+      return context
+
     }),
     remove_player: assign({
         players: ({ context, event }) => {
@@ -239,12 +147,13 @@ const machineSetup = setup({
     rounds_not_over: ({context }) => context.roundsLeft > 0,
     time_up: ({context }) => context.remainingTime <= 0,
     drawing_not_rated: ({context }) => context.remainingTime <= 0,
-    room_not_full: ({ context }) => context.players.length < context.maxPlayers
+    room_not_full: ({ context }) => context.players.length < 0,
+    is_owner: ({ context }) => context.owner === context.me,
   },
 })
 
 export const machine = machineSetup.createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwMYCcCWAjLAbMAsgIYoAWGAdmAHQDqRGALpVAAQBmA9mqwA65EAnmDSwAxACtOlANoAGALqJQvTrCYZOFZSAAeiAMwAWAKzUjcgJwBGOUcsB2UwDYAHCZMAaEIMSXnRtTOztb+AExhjsFyYQC+sd6omDj4xGSUNPQaFGxcPPxCIuKwjERojAD6UEQAtmDySkggqurMWjr6CMaW5mHWBgbOxpHWJg4O3r4IDiYG1CaWcksGlgYm7jHxiejYeIQk5FTUAOK1YKyUfGicUGhwsNQASpwArhQQrGhvFCxiUC-3Bo6FoadpNTrWMIDaiWSx9JauNbWZGTPwOZzUMJGdExByLQbOOIJEBJXapA4ZE5nC4UK43O6wB7PN4fL4UH45MRoIiMMAVCDcgDuLCBTRBbW04MQyI881WwVclhMYRMzicqIQrlcchhcKMBlcarsgy2JJ2KX26SOpzqNLpt3uT1e70+31+opUalBktAEJM1gc1DkkMs9mxg2NGuRS2oTgihvcq1DRO2yT2aUONBt50uvGuDsZTpZrvZv10JR5NCI7F5aAAFLYlgBKMSki0ZynZu15+mO5kutkcqAe5peiUdaV9HpuCKQ5UmIxasIahxa2OmOQOOSufXWQ0ps1p8lWrPU3P5hlM50fMDvSBiculXnUau1usmJZyFtt9MU61n2kewLK9i1vCBIBHcVNB9PRpX9QNg0iMMHAjfUNWCHodzCFC5ANFUIiMU0f2PTMqVtc9e0LfsbzvCAHwrZ9XxEd9P2-c1fxPMic0Ai8+2vVgwIg6xGk9VpoInBA3GsWN1nRBwsQ-VxrCjSFAiVfxFw2A0AyI9iSM7AD7UvOhuA+MhOC9TlBVMipzNgW9ILHcSpU1ZwzAGAwwiU7UHFGRcozkQlzDVIZrAsWYFxMXSj0tUiuwo4CTLQMzSAs9ROUfSsXxrZjzLUPlrOS-kXm5RgtDYmKO3-cieMoh5aFM1g8vS4dFGBJywV9RBDXcgYvL3Tc-NcDVQzmZw5A8RFsKMUwjGsaKyVigzbU4AA3EQuTgUpyiqM5HLEzrYIQMI7HmTz1lsMYDG3MKNUVQINz6PFIhWQL4mJChOHA+AmmIpaqHag6YIhU6YkbLdtyGD9lx8RAN2oLVnCVCxPJQ7FnAW9s-0yBhmByDhuD4ARhFEQHvQkiIzEWJYULxGbYSMZwNXWQJIU8sI1VCCx7Exji4sMoDLzJ8cXICOYPA8ex-ROiwYamWZXExKxFj6ZV0UXXn9Oq7ijL44tBxYYXnK6hBbEWag1jhVYYn1Ywmdh03NwxaH0SR2xIjczX-tPGrdao-jBIgI3DohUxAzhEIrA-FDrDcO7Y6DOwlT6hZHFcL2qp9nXBcdBrkqa1LLKgYPgcQN35glqXITsGIV3G2NrqcJZVRVAwM+xrjWDWkQS4k0YwiDeFNwRKHa4d2wZnMbdGZsLUwshd7YiAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwMYCcCWAjLAbMAsgIYoAWGAdmAMSxgAuA+gLZgDaADALqKgAOAe1gZ6GARV4gAHogBMHABwAWAHQB2AIxqAzGrVLZa2QDZZSgDQgAnogUBOAKwrjS7duM6TDhceMBfP0tUTBx8YjJKGgArAUpOHiQQQWFRcUkZBHlNFQcObQ47NQcHIx9LGwQNDgNnbQ06jSrfAwCg9Gw8QhJyKmp8IgA3dm5JZJExCUSM2SqOFSVjDjUODi8favLERY0VWT3jRzVjZVWNVpBgjrDuyOoAKnjRoXG0qblquYc3RSPtWW17GpNggjHZ5nZXBCVnZZAoHGdAhd2qEuhEqCoAOpEcYUKAAAgAZgI0Hi+LgiFYwGhYLR6EQ0EwoERWI9EmNUpNQBltEowQZ6u4ebI7BoSkDrIgitocnYVnk7NpvLlZOdLijwj0wCoAOLMsB4yiktACKBoOCwFQAJQEAFcKBA8Wg7RRKFBqFAbebWfxnhz0ogNP9pXYYbMFIrGhpgYVjLslEdVmpZe5TKrkZ0NZEdXqDRQjSazbALda7Q6nRQXbjqGgiPQwIwIDWAO6u71JX0Tf2VUVOBwK3z2ByyBweCwShAKBRzENmAEearuNMhDM3dG61i5-Om81W232x3O13UNvsztvSrwtQqDiBiEQnSLVzAxordQGWHHPvaCEqxFqldolq676oafDGtuRa7qWB4VkeUiwHSdYqEQBJ1mgAAUswcAAlLQ6bXIB2YbqB4GFsWe5loeuInh2rxcgGMxgsceyBkODhKJOsjAmok5vrkyzKHUPi-m0y4EZqREgXmYEFjuJb7mA9qQNQ8GIVqKFoehuQrLh-7iVmwGbjJEHkdBikQJANEpGe9EXlo163ry8buAuwK+GCyiGPkALDnsShLlcqISYZJGyZB8kOuZymqbW6moVSWlyrp+FBQZOahSZUEKUpEBsBoCQ+tZdHSFsCg7EUChHEYSi5GVz6Bqojh2C4k65ACWgBeqq5Ael0mkTuGLEg6ZACM8VZNkNjAjXQFBWS8nIlROxhOG4fxlVOmjsQoz4cKY8weMYdRKBwXzsQ4nUAcFvVbmRmJDXiI1jW6MVIRpCWPXQjATWgEANjaNb0OIyViala7XcZt2DT9D2kKNwjUSMbK0QtGQ+CtbiwhoG2ihx0auM4J3eH8+g1UoCKiYFmZgxuAhDGg1ZwHSDKMEyLKI4V81dvIqhfMOZUnToigaGOFT2KoNWnEmwrfrtASIhQAgWfAiR6aDYBPEVKMBtU14zCsyyKIdyrAsdqhLJoZjyAo-yKBd+noliOL4kSJJkhSVLKxzfrnnsTiyvrugQryELGMC3iqIGfwmJoUK8nbauSUZ-VFhrnPni40rFMUvLwtzqxhwCuwFKGNXNfoCjx1TPXEX1YWmfu5aVlAqfe7ZVSyioiowgqqyuDyofjlURw5Im7lVMKy2V91icZbdEV4lFEAtzZi3C186jhoJ3hY0+45FE4RRk9+JiBkY5NIiDVcz7XmVQ8NsNPcvxUZAcOxZ+xjiBh8XF74s6j5PoFYI5hzaCnoRQytMqRPy1heWQutZgGx8IqfOg8lhOGOsoV+k5haBjln4IAA */
   context: {
     maxPlayers: 8,
     hints: 2,
@@ -258,35 +167,28 @@ export const machine = machineSetup.createMachine({
     remainingTime: 0,
     currentWord: "",
     currentDrawerIndex: 0,
+    owner: "",
+    me: ""
 },
 
   id: "scribbleMachine",
+
   initial: "Waiting for players",
-  invoke: {
-    id: "ws",
-    src: "ws",
-  },
   states: {
     "Waiting for players": {
       on: {
-        join: {
-          actions: {
-            type: "add_player",
-          },
-          guard: "room_not_full",
-        },
-        leave: {
-          actions: {
-            type: "remove_player",
-          },
-        },
         start_game: {
           target: "Game in progress",
           actions: "start_game",
-          guard: {
-            type: "room_not_empty",
-          },
-        }
+          guard:  "room_not_empty",
+        },
+        join: {
+          actions: ["add_player"],
+        },
+        leave: {
+          actions: ["remove_player"],
+        },
+    
       },
 
       description:
@@ -330,7 +232,7 @@ export const machine = machineSetup.createMachine({
           exit: "remove_options",
           description: "The round has ended and the scores are shown, either because time is up or all players have guessed correctly.",
           after: {
-            5000: [
+            "leaderboard_duration": [
                 { target: "Word choosing", guard: "rounds_not_over" },
                 { target: "#scribbleMachine.Game over" }
               ]
@@ -345,7 +247,7 @@ export const machine = machineSetup.createMachine({
             }
           },
           after: {
-            choose_word_duraton: {
+            choose_word_duration: {
               target: "Round running",
               actions: ["pick_random_word", "start_round"],
             },

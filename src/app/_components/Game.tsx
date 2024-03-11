@@ -2,21 +2,31 @@
 import GameLobby from "~/app/_components/GameLobby"
 import GameStarted from "~/app/_components/GameStarted"
 import Error404 from "../_components/404";
-import { ActorContext } from "~/useGame";
 import WordChoosing from "./choose";
 import Leaderboard from "./leaderboard";
+import {  useEffect, useRef} from "react";
+import { useLocalStorage } from "~/hooks/useLocalStorage";
+import {  AvatarName } from "~/constants/avatars";
+import { useGameSyncedStore } from "~/data/gameStore";
 
 export default function Home(props : {gameId: string}) {
-  const state = ActorContext.useSelector(state => state)
+  const {state, send, gameLoop, is} = useGameSyncedStore();
+  const [avatar] = useLocalStorage<AvatarName>("AVATAR", "batman");
+  const [name] = useLocalStorage<string>("NAME", "Guest");
+  useEffect(() => {
+    send({type: "join", name, avatar, roomId: props.gameId})
+    if (is("owner")) {
+      gameLoop()
+    }
+  }, [state.context.players])
   return (
+
     <>
-    {(state.matches({"Game in progress": "Round ended"}) || state.matches("Game over")) && <Leaderboard />}
-    {state.matches({"Game in progress": "Word choosing"}) && <WordChoosing />}
-      {state.error ? <Error404 /> : 
-        state.matches("Waiting for players") ? <GameLobby gameId={props.gameId} /> : <GameStarted />  
+    {is("leaderboard") && <Leaderboard />}
+    {is("word_choosing") && <WordChoosing />}
+      {!state.value ? <Error404 /> : 
+        is("lobby") ? <GameLobby gameId={props.gameId} /> : <GameStarted />  
       } 
     </> 
   )
 }
-
-

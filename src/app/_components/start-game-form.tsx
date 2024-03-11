@@ -2,7 +2,8 @@
 import { api } from "~/trpc/react";
 import { useState } from "react";
 import { cn } from "~/utils/cn";
-import { avatars, Avatar } from "~/machine";
+import { avatars, AvatarName } from "~/constants/avatars";
+import { useGameSyncedStore } from "~/data/gameStore";
 type FormData = {
   maxPlayers: number,
   rounds: number,
@@ -10,39 +11,13 @@ type FormData = {
   hints: number
 }
 
-import { ActorContext } from "~/useGame";
-
-const randomAvatar = () => {
-  const idx = Math.random() * avatars.length;
-  return avatars[Math.floor(idx)] as Avatar;
-}
-
-const getRandomUser = () => {
-  return `user${Math.floor(Math.random() * 50)}`;
-
-}
-
 export default (props: {gameId: string}) => {
-  const state = ActorContext.useSelector(state => state);
-  const send = ActorContext.useActorRef().send;
-  const [formData, setFormData] = useState<FormData>({
-    maxPlayers: 8,
-    rounds: 3,
-    roundTime:30,
-    hints: 0
-  })
-
-  const onChangeMaker = (property: keyof FormData )=>{
-    return (e: any)=>{
-        setFormData((prev)=>({...prev, [property]: Number(e.target?.value)}))
-    }
-  }
+  const {state, send, me, is} = useGameSyncedStore();
+  const canStart = is("can_start");
+  const isOwner = is("owner")
 
   return (
     <form className="grid grid-cols-2 gap-3 w-full ">
-            <button className="bg-red-500 p-3 rounded-lg" onClick={(e) => {
-              e.preventDefault();
-              send({type: "join",  name: getRandomUser(), avatar: randomAvatar()})}}>Add Player</button>
       <h1 className="col-span-2 lg:text-xl">Settings</h1>
 
       <label className="relative">
@@ -65,8 +40,9 @@ export default (props: {gameId: string}) => {
           min={1}
           max={10}
           required
-          value={formData.rounds}
-          onChange={onChangeMaker("rounds")}
+          value={state.context.rounds}
+          onChange={(e)=> state.context.rounds = Number(e.target.value)}
+          disabled={!isOwner}
         />
       </label>
 
@@ -91,8 +67,10 @@ export default (props: {gameId: string}) => {
           max={3}
           step={1}
           required
-          value={formData.hints}
-          onChange={onChangeMaker("hints")}
+          value={state.context.hints}
+          onChange={(e)=> state.context.hints = Number(e.target.value)}
+          disabled={!isOwner}
+
         />
       </label>
 
@@ -117,8 +95,10 @@ export default (props: {gameId: string}) => {
           max={180}
           step={30}
           required
-          onChange={onChangeMaker("roundTime")}
-          value={formData.roundTime}
+          value={state.context.roundTime}
+          onChange={(e)=> state.context.roundTime = Number(e.target.value)}
+          disabled={!isOwner}
+
         />
       </label>
 
@@ -141,23 +121,24 @@ export default (props: {gameId: string}) => {
           placeholder="max players"
           required
           min={2}
-          onChange={onChangeMaker("maxPlayers")}
-          value={formData.maxPlayers}
+          value={state.context.maxPlayers}
+          onChange={(e)=> state.context.maxPlayers = Number(e.target.value)}
+          disabled={!isOwner}
           max={16}
           step={1}
         />
       </label>
       <button
-      disabled={state.context.players.length < 2}
+        disabled={!canStart}
         onClick={(e) => {
           e.preventDefault();
-          send({ type: "start_game", ...formData, gameId: props.gameId });
+          send({ type: "start_game", gameId: props.gameId });
         }}
         className={cn("col-span-2 rounded-lg bg-green-700 px-4 py-4 transition-all hover:scale-[1.02] hover:bg-green-800", {
-          "cursor-not-allowed bg-red-700 hover:bg-red-800": state.context.players.length < 2,
+          "cursor-not-allowed opacity-50 ": !canStart,
         })}
       >
-        { state.context.players.length < 2 ? "Not enough players" : "Start"}
+        { !canStart ? "Not enough players" : "Start"}
       </button>
     </form>
   );
