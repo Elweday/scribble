@@ -27,14 +27,14 @@ import { cn } from "~/utils/cn";
       })
     }, [api])
     
-    return (<Carousel setApi={setApi} opts={{ loop: true }} className="w-full place-content-center place-items-center">
+    return (<Carousel setApi={setApi} opts={{ loop: true }} className="block w-full place-content-center place-items-center">
       <CarouselContent >
         {avatars.map((av, i) => (
-          <CarouselItem  key={av} className="flex py-3 w-full place-content-center place-items-center basis-1/5">
+          <CarouselItem  key={av} className="flex py-5 w-full place-content-center place-items-center basis-1/5">
             <div className={cn(" transition-all",{
               "scale-[2] duration-500": idx === i
             })}>
-            <Avatar key={av} size="large" avatar={av} />
+            <Avatar key={av} size="xl" avatar={av} />
             </div>  
           </CarouselItem>
         ))}

@@ -9,7 +9,7 @@ export const TopBar = () => {
     const played = rounds - state.context.roundsLeft;
 
     return (
-        <div id="topbar" className="flex flex-col lg:flex-row bg-black/10 content-center items-center lg:h-[10rem] w-full justify-between gap-3 py-2 px-4 rounded-xl transition-all *:rounded-3xl "> 
+        <div id="topbar" className="flex flex-col lg:flex-row bg-black/10 content-center items-center lg:h-[100px] w-full justify-between gap-3 py-2 px-4 rounded-xl transition-all *:rounded-3xl "> 
 
             <div className="flex justify-between w-full lg:contents">
                 <span className="flex gap-1 content-center items-center ">
@@ -26,7 +26,7 @@ export const TopBar = () => {
 
             <span className="flex flex-wrap lg:gap-2 gap-1 place-content-center place-items-center"> 
                 {
-                    state.context.currentWord?.split("").map((letter, index) => <span className={cn("text-lg lg:text-3xl p-1 place-content-center place-items-center  bg-black/10 border-2   size-7 lg:size-10 text-center rounded-md ", {
+                    state.context.currentWord?.split("").map((letter, index) => <span className={cn("text-lg uppercase lg:text-3xl p-1 place-content-center place-items-center  bg-black/10 border-2   size-7 lg:size-10 text-center rounded-md ", {
 
                     })} key={index}>{is("myturn") ? letter : " "}</span>)
                 }

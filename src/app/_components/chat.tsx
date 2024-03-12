@@ -11,13 +11,13 @@ export const Chat = () => {
     const currentWord= state.context?.currentWord;
     const guessesToShow = state.context.guesses.filter(({id}) => !guessers.includes(id) || guessed )
     return (
-        <div className="flex flex-col h-full w-full bg-black/10 rounded-xl p-3  justify-between">
-            <ul className="flex flex-col-reverse lg:gap-3 gap-1 w-full  overflow-y-auto  lg:max-h-[35rem] max-h-[20rem]">
+        <div className="block h-full w-full bg-black/10 rounded-xl p-3  justify-between space-y-3">
+            <ul className="flex flex-col-reverse  lg:gap-2   gap-2 w-full  overflow-y-auto h-[26rem]   lg:h-[42rem]  ">
                 {guessesToShow.reverse().map(({id, word}, index) => (
                     state.context.players[id] && (
-                        <li key={index} className="flex gap-1 lg:gap-3">
-                            <span className="font-bold text-xs lg:text-lg">{state.context.players[id]?.name}:</span>
-                            <span className={ "text-xs lg:text-lg " + (word == currentWord ? "text-green-500": "")}>{word == currentWord ? "Guessed it !" : word}</span>
+                        <li key={index} className="flex flex-col">
+                            <span className="font-bold text-xs scale-75 origin-bottom-left text-slate-400">{state.context.players[id]?.name}</span>
+                            <span className={ "text-xs lg:text-md " + (word == currentWord ? "text-green-500": "")}>{word == currentWord ? "Guessed it !" : word}</span>
                         </li>
                     )
                 ))}

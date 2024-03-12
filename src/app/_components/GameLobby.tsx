@@ -19,11 +19,8 @@ export default function GameLobby(props: { gameId: string }) {
     
     <main className="place-content-center  place-items-center flex w-full h-full ">
       <div className=" flex  flex-col gap-3 w-full h-fit max-w-3xl p-4 px-12 ">
-        <pre>
-          {JSON.stringify(store.state.context, null, 2)}
-        </pre>
 
-        <h1 className="text-7xl lg:pb-16 ">{meta.name}</h1>
+        <h1 className="text-6xl lg:text-6xl pb-4 lg:pb-16 ">{meta.name}</h1>
         <h3 className="-mb-2 w-100">Ask your friends to join using this link</h3>
         <CopyToClipboard copyText={url} />  
         <Players  />

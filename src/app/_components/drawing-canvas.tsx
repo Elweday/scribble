@@ -46,10 +46,6 @@ const dispatchers =   {
         payload: { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY, event: "mouseMove" }
       })
     },
-    onMouseOut: (e:ME) => {
-      e.preventDefault();
-      dispatch({ action: "STOP",payload: {event: "mouseOut"}})
-    },
     onTouchStart: (e: TE) => {
       e.preventDefault();
       dispatch({
@@ -88,15 +84,18 @@ const dispatchers =   {
   
   return (
 
-      <div className="relative flex place-content-center place-items-center ">
-        { is("myturn") && (<Toolbar state={state} dispatch={dispatch} min={min} max={max}/>)}
+      <div className="relative col-span-4 lg:col-span-2  flex place-content-center place-items-center aspect-video">
+        { is("myturn") && (<Toolbar className={cn({
+          " pointer-events-none" : state.drawing
+        })} state={state} dispatch={dispatch} min={min} max={max}/>)}
         <canvas
-          className={cn("w-full h-full cursor-crosshair  rounded-lg  aspect-video" , {
+          className={cn("w-full h-full cursor-crosshair aspect-video rounded-lg " , {
             "cursor-not-allowed": !is("myturn")
           })}
           {...(is("myturn"))? dispatchers : {}}
           ref={canvasRef}
-          style={{ border: "1px solid black", backgroundColor: "white" }}
+          
+          style={{ border: "1px solid black", backgroundColor: "white", aspectRatio: "16/9" }}
           width={"100%"}
           height={"100%"}
         />

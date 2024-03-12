@@ -1,12 +1,14 @@
 "use client";
 import { useState } from "react";
 import { COLOR_PALETTE, type State, type Action } from "~/constants/draw";
+import { cn } from "~/utils/cn";
 
 type Props = {
     state: State;
     dispatch: (action: Action) => void;
     min: number;
     max: number;
+    className?: string;
 };
 
 export default  (props : Props) => {
@@ -15,7 +17,7 @@ export default  (props : Props) => {
     return (    
     <div
     id="toolbar"
-    className="flex flex-wrap text-black   w-full bg-black/20 p-1 gap-2 lg:p-3 lg:gap-3 rounded-xl transition-all lg:*:rounded-xl lg:*:min-h-12  *:max-h-4 *:rounded-md *:aspect-square *:min-h-6  absolute top-0 left-0 z-50  *:flex *:place-content-center *:place-items-center *:bg-black/20"
+    className={cn("flex flex-wrap text-purple-700   w-full bg-black/20 p-1 gap-2 lg:p-3 lg:gap-3 rounded-xl transition-all lg:*:rounded-xl lg:*:min-h-12  *:max-h-4 *:rounded-md *:aspect-square *:min-h-6  absolute top-0 left-0 z-1  *:flex *:place-content-center *:place-items-center *:ring-1 *:ring-white *:bg-black/20", props.className)}
   >
     <button
         className="transition-all hover:scale-110  rounded-full overflow-hidden border-2 border-gray-900"
@@ -31,7 +33,7 @@ export default  (props : Props) => {
     </button>
     {COLOR_PALETTE.map((color, index) => (
       <button
-        className="transition-all hover:scale-110 z-50"
+        className="transition-all hover:scale-110 z-50 "
         key={index}
         style={{ backgroundColor: color }}
         onClick={() => dispatch({ action: "COLOR", payload: { color } })}

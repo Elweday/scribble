@@ -36,8 +36,8 @@ export const Players = () => {
     const p = player.use();
 
     return (
-        <div className={cn("flex flex-col  w-full lg:gap-3 p-4   rounded-xl gap-2  relative bg-black/10 overflow-y-auto ", {
-            "lg:grid lg:grid-cols-2 max-h-40 lg:max-h-96": lobby
+        <div className={cn("flex flex-col col-span-2 lg:col-span-1  w-full lg:gap-3 p-4   rounded-xl gap-2  relative bg-black/10 overflow-y-auto ", {
+            "lg:grid lg:grid-cols-2 ": lobby
         })}>
             { <EditDialog open={open} setOpen={setOpen}  />}
             {players.length  > 0 ? players.map(([id, {avatar, score, name, guessed}], index) => 

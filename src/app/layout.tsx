@@ -14,14 +14,13 @@ export default function RootLayout({
   return (
     <html style={{fontFamily: primary.style.fontFamily}} className={` font-bold font-sans bg-gradient-to-t  from-[#66026d] to-25% to-[#13162c] text-white   lg:p-8 p-2  w-full h-full`} lang="en">
       <head >
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0" />
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <meta httpEquiv="X-UA-Compatible" content="ie=edge" />
         <title>{meta.name}</title>
         <meta name="description" content={meta.description} />
       </head>
-      <body className={` w-full h-full`}>
+      <body className={` w-full h-full overscroll-none`}>
             {children}
       </body>
     </html>

@@ -11,22 +11,21 @@ import { player } from "~/constants/game";
 
 
 
+
 export default function Home(props : {gameId: string}) {
   const {state, send, gameLoop, is} = useGameSyncedStore();
   const {avatar, name} = player.use()
   const id = useRef(uuidv4());
   const gameLoopRef = useRef(false);
-  const engine = useCallback(gameLoop, []);
+  const addPlayer = useCallback(() => {
+    send({type: "join", name, avatar, roomId: props.gameId, id: id.current})
+  }, [state.context.players])
 
-  engine()
   useEffect(function onJoin(){
-      send({type: "join", name, avatar, roomId: props.gameId, id: id.current})
-      console.log("joining game", state.context.players[id.current])
-      if (!gameLoopRef.current && is("owner") && state.context.players[id.current]) {
-        engine();
-      };
-      gameLoopRef.current = true
-  
+      addPlayer();
+      !gameLoopRef.current && gameLoop();
+      gameLoopRef.current = true;
+
   }, [state.context.players])
 
   useEffect(() => {

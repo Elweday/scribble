@@ -10,10 +10,7 @@ export const COLOR_PALETTE  = [
     "#00FF00",
     "#0000FF",
     "#FFFF00",
-    "#FFA500",
-    "#800080",
     "#A52A2A",
-    "#FFC0CB",
     "#00FFFF",
   ];
 

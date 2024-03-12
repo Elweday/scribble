@@ -7,7 +7,7 @@ export function Crown() {
 }
 
 
-type Size = "small" | "large";
+type Size = "small" | "large" | "xl";
 export const Avatar = (props: {avatar: AvatarName, rank?: number, size: Size  }) => {
     const path = `/avatars/${props.avatar}.svg`;
     return (
@@ -23,6 +23,7 @@ export const Avatar = (props: {avatar: AvatarName, rank?: number, size: Size  })
             <img className={cn("size-16 rounded-full lg:size-16 p-1", {
                 "size-[1rem] lg:size-[1.4rem]": props.size === "small",
                 "size-[2rem] lg:size-[2.3rem]": props.size === "large",
+                "size-[3rem] lg:size-[3.5rem]": props.size === "xl",
             })} src={path} alt="avatar" />
         </span>
     )

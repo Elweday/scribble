@@ -37,7 +37,9 @@ export const connect = (roomId: string) => {
     if (rooms.has(roomId)) {
         return rooms.get(roomId)!;
     }
-    const rtc = new WebrtcProvider(roomId, doc);
+    const rtc = new WebrtcProvider(roomId, doc, {
+        signaling: ["ws://localhost:9999"]
+    });
     rooms.set(roomId, rtc);
     return rtc;
 }
