@@ -171,7 +171,7 @@ export const machine = machineSetup.createMachine({
     me: ""
 },
 
-  id: "scribbleMachine",
+  id: "WordoodleMachine",
 
   initial: "Waiting for players",
   states: {
@@ -234,7 +234,7 @@ export const machine = machineSetup.createMachine({
           after: {
             "leaderboard_duration": [
                 { target: "Word choosing", guard: "rounds_not_over" },
-                { target: "#scribbleMachine.Game over" }
+                { target: "#WordoodleMachine.Game over" }
               ]
           }
         },

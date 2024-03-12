@@ -47,26 +47,12 @@ const actions: Events =  {
     },
 
     join: ({ payload })=>{
-        const rtc = connect(payload.roomId);
-        rtc.connect();
+        connect(payload.roomId);
         player.atom.set({...player.atom.get(), id: payload.id});
-        store.state.context.players[payload.id] = { name: payload.name, avatar: payload.avatar, score: 0, guessed: false };
         if (store.state.context.owner === "") {
             store.state.context.owner = payload.id;
         }
-
-        /* const ws = rtc.signalingConns[0] as SignalingConn;
-        rtc.on("peers", function({ removed }) {
-            const peer = rtc.room?.peerId as string;
-            player.atom.set(peer);
-            store.state.context.owner = Object.keys(store.state.context.players).length === 0 ? peer : store.state.context.owner;
-            store.state.context.players[peer] = { name: payload.name, avatar: payload.avatar, score: 0, guessed: false };
-            removed.forEach((id)=>{
-                const isOwner = store.state.context.owner === id;
-                if (isOwner) store.state.context.owner = Object.keys(store.state.context.players).find((id)=>id !== store.state.context.owner) as string;
-                Object.hasOwn(store.state.context.players, id) ? delete store.state.context.players[id] : null;
-            })
-        }) */ 
+        store.state.context.players[payload.id] = { name: payload.name, avatar: payload.avatar, score: 0, guessed: false };
     },
     leave: ({ payload }) => {
         const id = player.atom.get().id;
@@ -83,7 +69,7 @@ const actions: Events =  {
     guess: ({ payload }) => {
         const player = store.state.context.players[payload.id];
         if (!player) return;
-        const newGuess = {word: payload.word, playerName: player.name, avatar: player.avatar};
+        const newGuess = {word: payload.word, id: payload.id};
         store.state.context?.guesses.push(newGuess);
         if (!player.guessed){
             (store.state.context.players[payload.id] as Player).guessed = store.state.context.currentWord === payload.word;

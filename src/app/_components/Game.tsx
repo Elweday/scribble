@@ -5,7 +5,6 @@ import Error404 from "../_components/404";
 import WordChoosing from "./choose";
 import Leaderboard from "./leaderboard";
 import {  useEffect, useRef} from "react";
-import {  AvatarName } from "~/constants/avatars";
 import { useGameSyncedStore, getRandomUser, randomAvatar } from "~/data/gameStore";
 import { v4 as uuidv4 } from "uuid";
 import { useOnPageLeave } from "~/hooks/useOnPageLeave";
@@ -13,20 +12,21 @@ import { player } from "~/constants/game";
 
 
 export default function Home(props : {gameId: string}) {
-  const {state, send, gameLoop, is, me} = useGameSyncedStore();
+  const {state, send, gameLoop, is} = useGameSyncedStore();
   const {avatar, name} = player.use()
   const id = useRef(uuidv4());
   const gameLoopRef = useRef(false);
 
-  useEffect(() => {
-    if (!gameLoopRef.current && is("owner")){
-      gameLoop();
-      console.log("starting game loop")
-    };
-    gameLoopRef.current = true
-  }, [])
-  useEffect(() => {
+
+  useEffect(function onJoin(){
       send({type: "join", name, avatar, roomId: props.gameId, id: id.current})
+      console.log("joining game")
+      if (!gameLoopRef.current && state.context.players && is("owner")) {
+        gameLoop();
+        console.log("starting game loop")
+      };
+      gameLoopRef.current = true
+  
   }, [state.context.players])
   useOnPageLeave(() => {
     send({type: "leave", id: id.current})

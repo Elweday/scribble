@@ -17,17 +17,22 @@ export const player = storedAtom<Me>({
     id: "",
     name: "",
     avatar: "arab"
-}, {prefix: "_scribble_"});
+}, {prefix: "_Wordoodle_"});
 
 
 
 export const store = syncedStore({ state: {} as State}) as {state: State};
 const doc = getYjsDoc(store);
 
+const rooms = new Map();
+
+
 export const connect = (roomId: string) => {
-    const rtc = new WebrtcProvider(roomId, doc, {
-        "filterBcConns": false,
-    });
+    if (rooms.has(roomId)) {
+        return rooms.get(roomId)!;
+    }
+    const rtc = new WebrtcProvider(roomId, doc);
+    rooms.set(roomId, rtc);
     return rtc;
 }
 
@@ -43,8 +48,7 @@ type locale = typeof locales[number];
 
 type Guess = {
     word: string;
-    playerName: string;
-    avatar: string;
+    id: string;
 }
 
 export type Player = {
@@ -81,7 +85,6 @@ export type Event = (
 | { type: "guess"; word: string; id: string }
 | { type: "start_game"; gameId: string; }
 | { type: "word_chosen"; word: string }
-| { type: "restart_game" }
 | { type: "rate_drawing"; rating: number; player_id: number }
 | { type: "leave"; id: string }
 | { type: "set_me"; id: string; }
@@ -96,7 +99,7 @@ export type Event = (
 | { type: "end_game" }
 | { type: "end_round" }
 | { type: "decrement_time" }
-| { type: "draw"; img: imageData } 
+| { type: "draw"; img: imageData }
 )
 
 

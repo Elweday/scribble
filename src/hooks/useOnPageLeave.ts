@@ -6,6 +6,7 @@ export const useOnPageLeave = (handler: () => void) => {
       window.addEventListener('beforeunload', (event) => {
         handler();
       });
+      
       return () => {
         document.removeEventListener('beforeunload', handler);
       };

@@ -6,20 +6,17 @@ import { TopBar } from "~/app/_components/topbar";
 import { Chat } from "~/app/_components/chat";
 
 export default function GameStarted() {
-
   noStore();
-  const correct = "apple";
-  const isMyTurn = true;
   return (
     <main className="w-full h-full  flex-col gap-3 flex">
-        <h1 className="lg:text-5xl text-lg lg:pb-8 ">Scribble Game</h1>
+        <h1 className="lg:text-5xl text-lg lg:pb-8 ">Wordoodle</h1>
         <TopBar />
-        <div className="flex flex-col-reverse lg:flex-row  gap-3 h-full ">
-          <div className="flex lg:contents gap-1 max-h-[40rem]">
+        <div className="flex flex-col lg:flex-row  gap-3 h-full ">
+        <DrawingCanvas />
+          <div className="flex gap-1 flex-grow h-max *:min-w-56">
             <Players />
             <Chat />
           </div>
-            <DrawingCanvas />
         </div>
     </main>
   );

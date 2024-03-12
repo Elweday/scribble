@@ -3,21 +3,23 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import EditForm from "./edit-form";
 import { X } from "lucide-react";
 
-export default function EditDialog() {
+export default function EditDialog(props: {open: boolean, setOpen: (open: boolean) => void}) {
 return (
-<Dialog open={true}>
-  <DialogContent  className="z-[999] p-5 w-[80%] rounded bg-purple-950/80 ">
+<Dialog open={props.open}>
+  <DialogContent  className="z-[999]   rounded bg-purple-950/80 ">
     <DialogHeader>
       <DialogTitle className="flex justify-between place-items-center place-content-center">
         <span>
             What's your name?
             </span>
-        <button className="aspect-square  flex place-self-end" ><X /></button>
+            <DialogTrigger onClick={() => {
+              props.setOpen(false)
+            }}  >
+              <button className="aspect-square  flex place-self-end" ><X /></button>
+            </DialogTrigger>
       </DialogTitle>
-      <DialogDescription >
-      <div className="flex place-content-center place-items-center">
+      <DialogDescription  className=" flex place-content-center place-items-center w-[30rem]">
         <EditForm />
-      </div>
       </DialogDescription>
     </DialogHeader>
   </DialogContent>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useGameSyncedStore } from "~/data/gameStore";
 export default function WordChoosing() {
   const {state, send, me, is} = useGameSyncedStore();
-  const isMyTurn = state.context.currentDrawer === me;
+  const isMyTurn = state.context.currentDrawer === me.id;
     const choose = (word: string) =>  (e: any) => {
       e.preventDefault();
       send({type:"choose_word", word})

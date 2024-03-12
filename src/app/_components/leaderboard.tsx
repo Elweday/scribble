@@ -1,13 +1,8 @@
 "use client";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog"
-import { useState, useEffect, useContext } from "react";
 import { Avatar } from "./avatar";
 import { cn } from "~/utils/cn";
 import { useGameSyncedStore } from "~/data/gameStore";
-
-
-
-
 
 export default function Leaderboard() {
   const {state, send} = useGameSyncedStore();
@@ -46,7 +41,7 @@ export default function Leaderboard() {
             </div>
             </div>
             {state.value == "done" && 
-              <button className="rounded-md bg-white/10 py-2 px-3 place-content-center place-items-center flex font-semibold transition hover:bg-white/20 hover:scale-[1.02]" onClick={() => send({type: "restart_game"})}>Play Again!</button>
+              <button className="rounded-md bg-white/10 py-2 px-3 place-content-center place-items-center flex font-semibold transition hover:bg-white/20 hover:scale-[1.02]" onClick={() => send({ type: "start_game", gameId: state.context.gameId })}>Play Again!</button>
             }
 
             </div>

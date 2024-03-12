@@ -88,19 +88,19 @@ const dispatchers = !(is("myturn"))? {}:  {
   
   return (
 
-      <div className="relative flex h-full w-full aspect-video max-h-[40rem]">
+      <div className="relative flex aspect-video ">
         {is("myturn") ? (
           <Toolbar state={state} dispatch={dispatch} min={min} max={max}/>
         ):null}
         <canvas
-          className={cn(" w-full h-full cursor-crosshair aspect-video  rounded-lg", {
+          className={cn(" max-h-[30rem] w-full h-full cursor-crosshair  rounded-lg aspect-video " , {
             "cursor-not-allowed": !is("myturn")
           })}
           {...dispatchers}
           ref={canvasRef}
-          height={"100%"}
-          width={"100%"}
           style={{ border: "1px solid black", backgroundColor: "white" }}
+          width={"100%"}
+          height={"100%"}
         />
       </div>
   );

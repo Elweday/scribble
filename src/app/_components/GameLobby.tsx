@@ -22,16 +22,14 @@ export default function GameLobby(props: { gameId: string }) {
           {JSON.stringify(store.state.context, null, 2)}
         </pre>
 
-        <h1 className="text-5xl lg:pb-16 ">Scribble Game</h1>
+        <h1 className="text-7xl lg:pb-16 ">Wordoodle</h1>
         <h3 className="-mb-2 w-100">Ask your friends to join using this link</h3>
         <CopyToClipboard copyText={url} />  
-              <div className="flex flex-col place-content-center w-full  gap-10 ">
-          <Players  />
+        <Players  />
           <div>   
             <StartGameForm  gameId={props.gameId} />
           </div>
 
-        </div>
     </div>
     </main>
   );

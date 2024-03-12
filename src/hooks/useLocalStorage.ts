@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 
-const prefix = "SCRIBBLE_";
+const prefix = "Wordoodle_";
 export function useLocalStorage<T>(key: string, defaultValue: string) : [T, (v: T) => void] {
   const [value, setValue] = useState<T>(() => {
     if (typeof window === "undefined") return defaultValue as T;

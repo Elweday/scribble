@@ -13,7 +13,7 @@ export const Avatar = (props: {avatar: AvatarName, rank?: number, size: Size  })
     return (
         <span className="relative">
             {props.rank && (
-                 <span className={cn("absolute flex shadow-2 shadow-xl shadow-black place-content-center place-items-center  size-6 rounded-full border-white-200 border-2 bg-red-500", {
+                 <span className={cn("absolute flex shadow-2 shadow-xl shadow-black place-content-center place-items-center  size-6 rounded-full border-white-200 border-2 ", {
                     "bg-yellow-500 border-yellow-200 border-2": props.rank == 1,
                     "bg-gray-500 border-gray-200 border-2": props.rank == 2,
                     "bg-orange-700 border-orange-200 border-2": props.rank == 3,

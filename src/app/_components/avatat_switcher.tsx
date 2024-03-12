@@ -11,25 +11,31 @@ import {
   import { avatars, AvatarName } from "~/constants/avatars";
   import { Avatar } from "./avatar"
   import { player } from "~/constants/game";
+import { cn } from "~/utils/cn";
 
   export const AvatarSwitcher =  () =>{
     const [api, setApi] = useState<CarouselApi>()
     const {avatar} = player.use()
     const setAvatar  = (a: AvatarName) => player.set("avatar", a)
-
+    const [idx, setIdx] = useState(avatars.indexOf(avatar))
     useEffect(() => {
       api?.scrollTo(avatars.indexOf(avatar), true)
       api?.on("select", () => {
         const idx = api.selectedScrollSnap();
+        setIdx(idx)
         setAvatar(avatars[idx] as AvatarName)
       })
     }, [api])
     
     return (<Carousel setApi={setApi} opts={{ loop: true }} className="w-full place-content-center place-items-center">
       <CarouselContent >
-        {avatars.map((av) => (
-          <CarouselItem  key={av} className="flex w-full justify-center place-content-center place-items-center">
+        {avatars.map((av, i) => (
+          <CarouselItem  key={av} className="flex py-3 w-full place-content-center place-items-center basis-1/5">
+            <div className={cn(" transition-all",{
+              "scale-[2] duration-500": idx === i
+            })}>
             <Avatar key={av} size="large" avatar={av} />
+            </div>  
           </CarouselItem>
         ))}
       </CarouselContent>
