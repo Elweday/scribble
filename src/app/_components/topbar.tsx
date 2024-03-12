@@ -9,7 +9,7 @@ export const TopBar = () => {
     const played = rounds - state.context.roundsLeft;
 
     return (
-        <div id="topbar" className="flex flex-col lg:flex-row bg-black/10 content-center items-center lg:h-[100px] w-full justify-between gap-3 py-2 px-4 rounded-xl transition-all *:rounded-3xl "> 
+        <div id="topbar" className="flex flex-col lg:flex-row bg-black/10 content-center items-center lg:h-[10rem] w-full justify-between gap-3 py-2 px-4 rounded-xl transition-all *:rounded-3xl "> 
 
             <div className="flex justify-between w-full lg:contents">
                 <span className="flex gap-1 content-center items-center ">

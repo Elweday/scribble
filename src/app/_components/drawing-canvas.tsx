@@ -26,7 +26,7 @@ type ME = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
 type TE = React.TouchEvent<HTMLCanvasElement>;
 
 
-const dispatchers = !(is("myturn"))? {}:  {
+const dispatchers =   {
 
     onMouseDown: (e: ME) => {
       e.preventDefault();
@@ -88,15 +88,13 @@ const dispatchers = !(is("myturn"))? {}:  {
   
   return (
 
-      <div className="relative flex aspect-video ">
-        {is("myturn") ? (
-          <Toolbar state={state} dispatch={dispatch} min={min} max={max}/>
-        ):null}
+      <div className="relative flex place-content-center place-items-center ">
+        { is("myturn") && (<Toolbar state={state} dispatch={dispatch} min={min} max={max}/>)}
         <canvas
-          className={cn(" max-h-[30rem] w-full h-full cursor-crosshair  rounded-lg aspect-video " , {
+          className={cn("w-full h-full cursor-crosshair  rounded-lg  aspect-video" , {
             "cursor-not-allowed": !is("myturn")
           })}
-          {...dispatchers}
+          {...(is("myturn"))? dispatchers : {}}
           ref={canvasRef}
           style={{ border: "1px solid black", backgroundColor: "white" }}
           width={"100%"}

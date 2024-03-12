@@ -11,7 +11,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html style={{fontFamily: primary.style.fontFamily}} className={`h-screen w-screen font-bold`} lang="en">
+    <html style={{fontFamily: primary.style.fontFamily}} className={` font-bold font-sans bg-gradient-to-t  from-[#66026d] to-25% to-[#13162c] text-white   lg:p-8 p-2  w-full h-full`} lang="en">
       <head >
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta charSet="utf-8" />
@@ -20,7 +20,7 @@ export default function RootLayout({
         <title>Wordoodle</title>
         <meta name="description" content="Wordoodle" />
       </head>
-      <body className={`font-sans bg-gradient-to-t  from-[#66026d] to-25% to-[#13162c] text-white   lg:p-8 p-2  w-full h-full `}>
+      <body className={` w-full h-full`}>
             {children}
       </body>
     </html>
