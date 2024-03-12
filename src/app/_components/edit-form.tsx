@@ -16,6 +16,7 @@ export default function EditForm() {
         id="rounds"
         placeholder="Your name"
         maxLength={20}
+        min={3}
         required
       />
         <AvatarSwitcher />

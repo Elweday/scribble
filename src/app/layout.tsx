@@ -1,6 +1,7 @@
 import "~/styles/globals.css";
 
 import { Macondo } from "next/font/google";
+import { meta } from "~/constants/game";
 
 const primary = Macondo({ subsets: ["latin"], variable: "--font-family", weight: [ "400" ] });
 
@@ -16,9 +17,9 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <title>Wordoodle</title>
-        <meta name="description" content="Wordoodle" />
+        <meta httpEquiv="X-UA-Compatible" content="ie=edge" />
+        <title>{meta.name}</title>
+        <meta name="description" content={meta.description} />
       </head>
       <body className={` w-full h-full`}>
             {children}

@@ -6,12 +6,13 @@ import StartGameForm from "./start-game-form";
 import { store } from "~/useGame";
 
 import { useState } from "react";
+import { meta } from "~/constants/game";
 
 export default function GameLobby(props: { gameId: string }) {
   
   
   noStore();
-  const url = "http://localhost:3000/" + props.gameId;
+  const url = meta.link + props.gameId;
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
   return (
@@ -22,7 +23,7 @@ export default function GameLobby(props: { gameId: string }) {
           {JSON.stringify(store.state.context, null, 2)}
         </pre>
 
-        <h1 className="text-7xl lg:pb-16 ">Wordoodle</h1>
+        <h1 className="text-7xl lg:pb-16 ">{meta.name}</h1>
         <h3 className="-mb-2 w-100">Ask your friends to join using this link</h3>
         <CopyToClipboard copyText={url} />  
         <Players  />

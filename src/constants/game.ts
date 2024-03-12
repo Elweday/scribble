@@ -6,6 +6,12 @@ import syncedStore from "@syncedstore/core";
 import { WebrtcProvider } from "y-webrtc";
 import { imageData } from "~/utils/imageData";
 
+export const meta = {
+    name: "Wordoodle",
+    description: "Play Wordoodle with your friends",
+    link: "https://wordoodle.vercel.app/",
+
+} 
 
 
 type Me = {
@@ -24,7 +30,7 @@ export const player = storedAtom<Me>({
 export const store = syncedStore({ state: {} as State}) as {state: State};
 const doc = getYjsDoc(store);
 
-const rooms = new Map();
+const rooms = new Map<string, WebrtcProvider>();
 
 
 export const connect = (roomId: string) => {
@@ -35,7 +41,6 @@ export const connect = (roomId: string) => {
     rooms.set(roomId, rtc);
     return rtc;
 }
-
 
 type StateValue = "lobby" | "game.word_choosing" | "game.running" | "game.round_ended" | "done" 
 
