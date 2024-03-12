@@ -4,7 +4,7 @@ import { Players } from "~/app/_components/players";
 import CopyToClipboard from "../_components/copy-to-clipboard";
 import StartGameForm from "./start-game-form";
 import { store } from "~/useGame";
-import EditDialog from "./name-dialog";
+
 import { useState } from "react";
 
 export default function GameLobby(props: { gameId: string }) {
@@ -17,7 +17,6 @@ export default function GameLobby(props: { gameId: string }) {
   return (
     
     <main className="place-content-center  place-items-center flex w-full h-full ">
-      <EditDialog open={open} close={close} />
       <div className=" flex  flex-col gap-3 w-full h-fit max-w-3xl p-4 px-12 ">
         <pre>
           {JSON.stringify(store.state.context, null, 2)}

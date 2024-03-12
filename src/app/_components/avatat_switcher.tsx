@@ -10,12 +10,12 @@ import {
   import { useEffect, useState } from "react"
   import { avatars, AvatarName } from "~/constants/avatars";
   import { Avatar } from "./avatar"
-  import { useLocalStorage } from "~/hooks/useLocalStorage";
-  
+  import { player } from "~/constants/game";
 
   export const AvatarSwitcher =  () =>{
     const [api, setApi] = useState<CarouselApi>()
-    const [avatar, setAvatar] = useLocalStorage<AvatarName>("AVATAR", "batman");
+    const {avatar} = player.use()
+    const setAvatar  = (a: AvatarName) => player.set("avatar", a)
 
     useEffect(() => {
       api?.scrollTo(avatars.indexOf(avatar), true)

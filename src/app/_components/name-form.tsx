@@ -1,24 +1,21 @@
 "use client";
 import { useState, useEffect } from "react";
 import { cn } from "~/utils/cn";
-import { AvatarSwitcher } from "./avatat_switcher";
-import { useLocalStorage } from "~/hooks/useLocalStorage";
-import { AvatarName } from "~/constants/avatars";
 import { useRouter } from 'next/navigation'
 import { useGameSyncedStore } from "~/data/gameStore";
 import EditForm from "./edit-form";
-
+import { player } from "~/constants/game";
 
 export default function NameForm() {
-    const [name, setName] = useLocalStorage<string>("NAME", "Guest");
-    const [avatar, setAvatar] = useLocalStorage<AvatarName>("AVATAR", "batman");
+    const { avatar, name} = player.use()
     const [isPublic, setIsPublic] = useState(true); 
     const { send }= useGameSyncedStore();
     const router = useRouter();
+
     const createRoom = (e: any) => {
         e.preventDefault()
         const gameId = Math.random().toString(36).substring(2, 12);
-        send({type: "join", name, avatar, roomId: gameId })
+        send({type: "join", name, avatar, roomId: gameId, id: ""  })
         typeof window !== 'undefined' && router.push(`/${gameId}`)
     }
     return (

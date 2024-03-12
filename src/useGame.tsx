@@ -33,9 +33,7 @@ export const ActorContext = createActorContext(machine);
 export function GameProvider({children}:{children: React.ReactNode}) {
 
   return (
-    <ActorContext.Provider>
       {children}
-    </ActorContext.Provider>
   );
 }
 

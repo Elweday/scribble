@@ -1,9 +1,10 @@
 "use client";
 import { AvatarSwitcher } from "./avatat_switcher";
-import { useLocalStorage } from "~/hooks/useLocalStorage";
+import { player } from "~/constants/game";
 
 export default function EditForm() {
-  const [name, setName] = useLocalStorage<string>("NAME", "Guest");
+  const {name} = player.use()
+  const setName  = (n: string) => player.set("name", n)
   return (
     <div className="flex flex-col gap-5 max-w-[400px]">
       <input
