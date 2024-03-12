@@ -25,7 +25,7 @@ export default  (props : Props) => {
       type="color"
       className="origin-center scale-[2] w-full h-full"
       onChange={(e) =>
-        dispatch({ type: "COLOR", payload: { color: e.target.value } })
+        dispatch({ action: "COLOR", payload: { color: e.target.value } })
     }
     />
     </button>
@@ -34,12 +34,12 @@ export default  (props : Props) => {
         className="transition-all hover:scale-110 z-50"
         key={index}
         style={{ backgroundColor: color }}
-        onClick={() => dispatch({ type: "COLOR", payload: { color } })}
+        onClick={() => dispatch({ action: "COLOR", payload: { color } })}
       />
     ))}
     <button
       className="transition-all hover:scale-110 bg-black/10"
-      onClick={() => dispatch({ type: "CLEAR" })}
+      onClick={() => dispatch({ action: "CLEAR" })}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +73,7 @@ export default  (props : Props) => {
         value={state.width}
         onChange={(e) =>
           dispatch({
-            type: "WIDTH",
+            action: "WIDTH",
             payload: { width: Number(e.target.value) },
           })
         }
@@ -81,7 +81,7 @@ export default  (props : Props) => {
       />
       )}
       </button>
-      <button className="transition-all hover:scale-110 bg-black/10" onClick={() => dispatch({ type: "UNDO" })}>
+      <button className="transition-all hover:scale-110 bg-black/10" onClick={() => dispatch({ action: "UNDO" })}>
       <svg className="lg:size-20 size-8" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24">
       <path fill="currentColor" d="M1 8.5L8 14v-4h1c4 0 7 2 7 6v1h3v-1c0-6-5-9-10-9H8V3z"></path>
 </svg>

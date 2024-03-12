@@ -13,7 +13,7 @@ const floodFill = (ctx: CanvasRenderingContext2D, x: number, y: number, oldColor
   }
 }
 
-const makeReducerFunc = (canvasRef:RefObject<HTMLCanvasElement>) => (state: State, {type, payload}: Action) => {
+const makeReducerFunc = (canvasRef:RefObject<HTMLCanvasElement>) => (state: State, {action, payload}: Action) => {
     let {x, y, width, color, drawing, history, historyIndex} = {...state, ...payload};
     const canvas = canvasRef.current as HTMLCanvasElement;
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D; 
@@ -22,7 +22,7 @@ const makeReducerFunc = (canvasRef:RefObject<HTMLCanvasElement>) => (state: Stat
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
-    switch (type) {
+    switch (action) {
       case "START":
         ctx.beginPath();
         return { ...state, drawing: true, x,y };
@@ -44,7 +44,6 @@ const makeReducerFunc = (canvasRef:RefObject<HTMLCanvasElement>) => (state: Stat
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           history.push(imageData);
           historyIndex = historyIndex +1;
-          console.log(`history added!! index: ${historyIndex}, length: ${history.length}, from event ${payload?.event}` );
           ctx.closePath();
 
         };

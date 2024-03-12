@@ -4,7 +4,7 @@ import { useGameSyncedStore } from "~/data/gameStore";
 
 export const TopBar = () => {
     const {state, is} = useGameSyncedStore()
-    const rounds = state.context.rounds;
+    const rounds = state.context.config.rounds;
     const played = rounds - state.context.roundsLeft;
 
     return (

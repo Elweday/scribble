@@ -8,17 +8,22 @@ import {  useEffect, useRef} from "react";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
 import {  AvatarName } from "~/constants/avatars";
 import { useGameSyncedStore } from "~/data/gameStore";
+import { v4 as uuidv4 } from "uuid";
+import { useOnPageLeave } from "~/hooks/useOnPageLeave";
 
 export default function Home(props : {gameId: string}) {
-  const {state, send, gameLoop, is} = useGameSyncedStore();
+  const {state, send, gameLoop, is, me} = useGameSyncedStore();
   const [avatar] = useLocalStorage<AvatarName>("AVATAR", "batman");
   const [name] = useLocalStorage<string>("NAME", "Guest");
+  const id = useRef(uuidv4());
+  const leaveRef = useRef(false);
   useEffect(() => {
-    send({type: "join", name, avatar, roomId: props.gameId})
-    if (is("owner")) {
-      gameLoop()
-    }
+      send({type: "join", name, avatar, roomId: props.gameId, id: id.current})
+      if (is("owner")) gameLoop();
   }, [state.context.players])
+  useOnPageLeave(() => {
+    send({type: "leave", id: id.current})
+  })
   return (
 
     <>

@@ -32,7 +32,7 @@ export const stateSchema = z.object({
 export type State = z.infer<typeof stateSchema>
 
 export const actionSchema = z.object({
-    type: z.enum(ACTION_TYPES),
+    action: z.enum(ACTION_TYPES),
     payload: stateSchema.extend({
         event: z.string(),
     }).partial().optional(),

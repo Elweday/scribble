@@ -1,18 +1,9 @@
 "use client";
-import { api } from "~/trpc/react";
-import { useState } from "react";
 import { cn } from "~/utils/cn";
-import { avatars, AvatarName } from "~/constants/avatars";
 import { useGameSyncedStore } from "~/data/gameStore";
-type FormData = {
-  maxPlayers: number,
-  rounds: number,
-  roundTime: number,
-  hints: number
-}
 
 export default (props: {gameId: string}) => {
-  const {state, send, me, is} = useGameSyncedStore();
+  const {state, send, is} = useGameSyncedStore();
   const canStart = is("can_start");
   const isOwner = is("owner")
 
@@ -40,8 +31,8 @@ export default (props: {gameId: string}) => {
           min={1}
           max={10}
           required
-          value={state.context.rounds}
-          onChange={(e)=> state.context.rounds = Number(e.target.value)}
+          value={state.context.config.rounds}
+          onChange={(e)=> state.context.config.rounds = Number(e.target.value)}
           disabled={!isOwner}
         />
       </label>
@@ -67,8 +58,8 @@ export default (props: {gameId: string}) => {
           max={3}
           step={1}
           required
-          value={state.context.hints}
-          onChange={(e)=> state.context.hints = Number(e.target.value)}
+          value={state.context.config.hints}
+          onChange={(e)=> state.context.config.hints = Number(e.target.value)}
           disabled={!isOwner}
 
         />
@@ -95,8 +86,8 @@ export default (props: {gameId: string}) => {
           max={180}
           step={30}
           required
-          value={state.context.roundTime}
-          onChange={(e)=> state.context.roundTime = Number(e.target.value)}
+          value={state.context.config.roundTime}
+          onChange={(e)=> state.context.config.roundTime = Number(e.target.value)}
           disabled={!isOwner}
 
         />
@@ -121,8 +112,8 @@ export default (props: {gameId: string}) => {
           placeholder="max players"
           required
           min={2}
-          value={state.context.maxPlayers}
-          onChange={(e)=> state.context.maxPlayers = Number(e.target.value)}
+          value={state.context.config.maxPlayers}
+          onChange={(e)=> state.context.config.maxPlayers = Number(e.target.value)}
           disabled={!isOwner}
           max={16}
           step={1}

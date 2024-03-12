@@ -1,17 +1,18 @@
 "use client";
-import { useRef,  useEffect, useLayoutEffect, DOMAttributes } from "react";
+import { useRef,  useEffect, useLayoutEffect, DOMAttributes, useState } from "react";
 import { useCanvas } from "~/hooks/useCanvas";
 import { Action } from "~/constants/draw";
 import Toolbar from "./toolbar";
 import { cn } from "~/utils/cn";
 import { useGameSyncedStore } from "~/data/gameStore";
+import { putImage, getImage } from "~/utils/imageData";
 
 const Canvas = () => {
-    const {is} = useGameSyncedStore()  
+    const {is, send, state: store, me} = useGameSyncedStore()  
     const min = 20;
     const max = 100;
     const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [state, clientDispatch] = useCanvas(canvasRef, {
+    const [state, dispatch] = useCanvas(canvasRef, {
     color: "#000000",
     width: Number(min),
     drawing: false,
@@ -20,66 +21,71 @@ const Canvas = () => {
     history: [],
     historyIndex: -1,
   });
-  const dispatch = (action: Action) => {
-    clientDispatch(action);
-  };
-
 
 type ME = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
 type TE = React.TouchEvent<HTMLCanvasElement>;
-  
+
+
 const dispatchers = !(is("myturn"))? {}:  {
 
     onMouseDown: (e: ME) => {
       e.preventDefault();
       dispatch({
-        type: "START",
+        action: "START",
         payload: { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY, event: "mouseDown" },
       })
   },
     onMouseUp: (e:ME) => {
       e.preventDefault();
-      dispatch({ type: "STOP", payload: {event: "mouseUp", } })
+      dispatch({ action: "STOP", payload: {event: "mouseUp", } })
     },
     onMouseMove: (e: ME) => {
       e.preventDefault();
       dispatch({
-        type: "DRAW",
+        action: "DRAW",
         payload: { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY, event: "mouseMove" }
       })
     },
     onMouseOut: (e:ME) => {
       e.preventDefault();
-      dispatch({ type: "STOP",payload: {event: "mouseOut"}})
+      dispatch({ action: "STOP",payload: {event: "mouseOut"}})
     },
     onTouchStart: (e: TE) => {
       e.preventDefault();
       dispatch({
-        type: "START",
+        action: "START",
         payload: { x: e.touches[0]?.clientX, y: e.touches[0]?.clientY, event: "touchStart" },
       });
     }, 
     onTouchMove: (e: TE) => {
       dispatch({
-        type: "DRAW",
+        action: "DRAW",
         payload: { x: e.touches[0]?.clientX, y: e.touches[0]?.clientY, event: "touchMove" },
       });
     }, 
     onTouchEnd: (e:TE) => {
       e.preventDefault();
-      dispatch({ type: "STOP", payload: {event: "touchEnd"} });
+      dispatch({ action: "STOP", payload: {event: "touchEnd"} });
     },
     };
 
-    useLayoutEffect(() => {
-      
-    const canvas = canvasRef.current as HTMLCanvasElement;
-    const { width, height } = canvas.getBoundingClientRect()
-    const ctx = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
-    canvas.width = width
-    canvas.height = height
-  }, []);
 
+    useLayoutEffect(() => {
+      const canvas = canvasRef.current as HTMLCanvasElement;
+      const { width, height } = canvas.getBoundingClientRect()
+      canvas.width = width
+      canvas.height = height
+    }, []);
+
+    useEffect(() => {
+      if (!is("myturn") && store.context.canvas){
+        const canvas = canvasRef.current as HTMLCanvasElement;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
+        // putImage(store.context.canvas, ctx);  
+        console.log("image recived by ", me)
+      }
+    }, [store.context.canvas])
+  
   return (
 
       <div className="relative flex h-full w-full aspect-video max-h-[40rem]">

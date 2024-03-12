@@ -1,10 +1,14 @@
 import { AvatarName, avatars } from "~/constants/avatars";
 import { getYjsDoc, syncedStore, Box, boxed  } from "@syncedstore/core";
-import { WebrtcProvider } from "y-webrtc";
+import { SignalingConn, WebrtcProvider } from "y-webrtc";
 import { useSyncedStore } from "@syncedstore/react";
 import { atom } from 'nanostores'
 import { useStore } from '@nanostores/react'
 import { getRandomWords } from "./words";
+import { imageData } from "~/utils/imageData";
+import { WebSocketServer } from "ws";
+import { v4 as uuidv4 } from 'uuid';
+
 
 const playerAtom = atom<string>("");
 
@@ -14,14 +18,9 @@ const doc = getYjsDoc(store);
 const rooms = new Map<string, WebrtcProvider>();
 
 const connect = (roomId: string) => {
-    if (rooms.has(roomId)) {
-        return rooms.get(roomId) as WebrtcProvider;
-    }
     const rtc = new WebrtcProvider(roomId, doc, {
-         signaling: ["ws://localhost:9999"],
-         peerOpts: { initiator: true,  }
+        "filterBcConns": false,
     });
-    rooms.set(roomId, rtc);
     return rtc;
 }
 
@@ -54,18 +53,20 @@ type Player = {
 type Context = {
   gameId: string;
   players: Record<string, Player>;
+  config: {
+    maxPlayers: number;
+    hints: number;
+    roundTime: number;
+    rounds: number;
+  }
   roundsLeft: number;
   currentWord: string;
   currentDrawer: string;
   remainingTime: number;
-  roundTime: number;
-  rounds: number;
   guesses: Guess[];
   wordOptions: string[];
-  maxPlayers: number;
-  hints: number;
   owner: string;
-  me: Box<string>;
+  canvas: imageData | null;
 }
 
 type Event = (
@@ -82,11 +83,12 @@ type Event = (
 | { type: "get_words" }
 | { type: "pick_random_word" }
 | { type: "remove_options" }
-| { type: "join"; roomId: string; name: string; avatar: AvatarName; }
+| { type: "join"; roomId: string; name: string; avatar: AvatarName; id: string }
 | { type: "remove_player"; id: string; }
 | { type: "end_game" }
 | { type: "end_round" }
 | { type: "decrement_time" }
+| { type: "draw"; img: imageData } 
 )
 
 
@@ -104,32 +106,30 @@ type State = {
     context: Context;
 }
 
-
 const initialState: State = {
     value: "lobby",
     context: {
-        maxPlayers: 8,
-        hints: 2,
+        config: {
+            maxPlayers: 8,
+            hints: 2,
+            roundTime: 100,
+            rounds: 5,
+        },
+        canvas: null,
         gameId: "",
         players: {},
         guesses: [],
         wordOptions: [],
         roundsLeft: 0,
-        rounds: 5,
-        roundTime: 100,
         remainingTime: 0,
         currentWord: "",
         currentDrawer: "",
         owner: "",
-        me: boxed("")
     }
 };
 
 store.state.context = initialState.context;
 store.state.value = initialState.value;
-
-
-
 
 const actions: Events =  {
     start_game: ({ payload }) => {
@@ -137,11 +137,11 @@ const actions: Events =  {
         store.state.context.gameId = payload.gameId
         store.state.context.currentDrawer = store.state.context.owner
         store.state.context.wordOptions = getRandomWords(3);
-        store.state.context.roundsLeft = store.state.context.rounds;
+        store.state.context.roundsLeft = store.state.context.config.rounds;
     },
     start_round: () => {
         store.state.value = "game.running"
-        store.state.context.remainingTime = store.state.context.roundTime;
+        store.state.context.remainingTime = store.state.context.config.roundTime;
         Object.keys(store.state.context.players).forEach((id) => {
             (store.state.context.players[id] as Player).drawingRating = undefined;
             (store.state.context.players[id] as Player).guessed = false;
@@ -164,6 +164,14 @@ const actions: Events =  {
 
     join: ({ payload })=>{
         const rtc = connect(payload.roomId);
+        rtc.connect();
+        playerAtom.set(payload.id);
+        store.state.context.players[payload.id] = { name: payload.name, avatar: payload.avatar, score: 0, guessed: false };
+        if (store.state.context.owner === "") {
+            store.state.context.owner = payload.id;
+        }
+
+        /* const ws = rtc.signalingConns[0] as SignalingConn;
         rtc.on("peers", function({ removed }) {
             const peer = rtc.room?.peerId as string;
             playerAtom.set(peer);
@@ -174,7 +182,16 @@ const actions: Events =  {
                 if (isOwner) store.state.context.owner = Object.keys(store.state.context.players).find((id)=>id !== store.state.context.owner) as string;
                 Object.hasOwn(store.state.context.players, id) ? delete store.state.context.players[id] : null;
             })
-        }) 
+        }) */ 
+    },
+    leave: ({ payload }) => {
+        const id = playerAtom.get();
+        const isOwner = store.state.context.owner === id;
+        if (isOwner) {
+            const owner = Object.keys(store.state.context.players).find((id)=>id!== store.state.context.owner) as string;
+            store.state.context.owner = owner;
+        }
+        Object.hasOwn(store.state.context.players, id) ? delete store.state.context.players[id] : null;
     },
     rate_drawing: ({  payload }) => {
         (store.state.context.players[payload.player_id] as Player).drawingRating = payload.rating;
@@ -206,7 +223,7 @@ const actions: Events =  {
             }
         });
         store.state.context.wordOptions = getRandomWords(3);
-    }
+    },
 }
 
 
@@ -233,6 +250,7 @@ export const useGameSyncedStore = () => {
         "round.done": () => state.value === "game.running" && (state.context.remainingTime === 0 || Object.values(store.state.context.players).every((p)=>p.guessed)),
         "can_start" : () =>  Object.values(state.context.players).length > 1 && state.context.owner === me,
         "word_choosing": ()=> state.value === "game.word_choosing",
+        "rounds_not_over": ()=> state.context.roundsLeft > 0
     } as const; 
     const is = (key: keyof typeof checks) => checks[key]();
     const gameLoop = () => setInterval(()=>{
@@ -241,9 +259,14 @@ export const useGameSyncedStore = () => {
         }
         if (is("round.done") ) {
             send({ type: "end_round"});
-            setTimeout(()=>{
-                store.state.value = "game.word_choosing"
-            }, 5000)
+            if(is("rounds_not_over")){
+                setTimeout(()=>{
+                    store.state.value = "game.word_choosing"
+                }, 5000)
+            }
+            else {
+                store.state.value = "done";
+            }
         }
     }, 1000)
 
