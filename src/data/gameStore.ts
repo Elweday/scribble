@@ -2,6 +2,7 @@ import { AvatarName, avatars } from "~/constants/avatars";
 import { useSyncedStore } from "@syncedstore/react";
 import { getRandomWords } from "./words";
 import { store, Events, Player, connect, player, Event } from "~/constants/game";
+import { SignalingConn } from "y-webrtc";
 
 
 export const randomAvatar = () => {
@@ -47,7 +48,11 @@ const actions: Events =  {
     },
 
     join: ({ payload })=>{
-        connect(payload.roomId);
+        const rtc = connect(payload.roomId);
+        const signalingConn = rtc.signalingConns[0] as SignalingConn;
+        signalingConn.on("connect", (data, r) => {
+            console.log("connected", data, r);
+        })
         player.atom.set({...player.atom.get(), id: payload.id});
         if (store.state.context.owner === "") {
             store.state.context.owner = payload.id;

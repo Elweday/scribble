@@ -30,6 +30,8 @@ export const player = storedAtom<Me>({
 export const store = syncedStore({ state: {} as State}) as {state: State};
 const doc = getYjsDoc(store);
 
+
+
 const rooms = new Map<string, WebrtcProvider>();
 
 
@@ -38,7 +40,7 @@ export const connect = (roomId: string) => {
         return rooms.get(roomId)!;
     }
     const rtc = new WebrtcProvider(roomId, doc, {
-        signaling: ["ws://localhost:9999"]
+        signaling: ['wss://demos.yjs.dev/ws']
     });
     rooms.set(roomId, rtc);
     return rtc;

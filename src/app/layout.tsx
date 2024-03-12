@@ -17,6 +17,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0" />
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="ie=edge" />
+        <link rel="icon" href="/favicon.svg" />
         <title>{meta.name}</title>
         <meta name="description" content={meta.description} />
       </head>
