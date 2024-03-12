@@ -50,9 +50,6 @@ const actions: Events =  {
     join: ({ payload })=>{
         const rtc = connect(payload.roomId);
         const signalingConn = rtc.signalingConns[0] as SignalingConn;
-        signalingConn.on("connect", (data, r) => {
-            console.log("connected", data, r);
-        })
         player.atom.set({...player.atom.get(), id: payload.id});
         if (store.state.context.owner === "") {
             store.state.context.owner = payload.id;
