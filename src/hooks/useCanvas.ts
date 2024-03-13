@@ -1,5 +1,6 @@
 import { useReducer, type RefObject} from 'react'
 import { type State, type Action } from "~/constants/draw";
+import { useGameSyncedStore } from "~/data/gameStore";
 
 
 const floodFill = (ctx: CanvasRenderingContext2D, x: number, y: number, oldColor: string, newColor: string) => {
@@ -45,7 +46,6 @@ const makeReducerFunc = (canvasRef:RefObject<HTMLCanvasElement>) => (state: Stat
           history.push(imageData);
           historyIndex = historyIndex +1;
           ctx.closePath();
-
         };
         return { ...state, drawing: false, history, historyIndex };
       case "CLEAR":
@@ -67,7 +67,6 @@ const makeReducerFunc = (canvasRef:RefObject<HTMLCanvasElement>) => (state: Stat
           historyIndex = historyIndex - 1;
           history.pop();
           ctx.putImageData(history[historyIndex], 0, 0);
-          console.log(`history removed!! index: ${historyIndex}, length: ${history.length}` );
           return { ...state, history, historyIndex };
         }
       default:

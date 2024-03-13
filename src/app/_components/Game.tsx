@@ -5,12 +5,9 @@ import Error404 from "../_components/404";
 import WordChoosing from "./choose";
 import Leaderboard from "./leaderboard";
 import {  useEffect, useRef, useCallback} from "react";
-import { useGameSyncedStore, getRandomUser, randomAvatar } from "~/data/gameStore";
+import { useGameSyncedStore  } from "~/data/gameStore";
 import { v4 as uuidv4 } from "uuid";
 import { player } from "~/constants/game";
-
-
-
 
 export default function Home(props : {gameId: string}) {
   const {state, send, gameLoop, is} = useGameSyncedStore();
@@ -32,12 +29,7 @@ export default function Home(props : {gameId: string}) {
     const handler = () => {
       send({type: "leave", id: id.current});
     }
-
     window.addEventListener('beforeunload', handler);
-    
-    return () => {
-      document.removeEventListener('beforeunload', handler);
-    };
   }, [state.context.players]);
 
   return (

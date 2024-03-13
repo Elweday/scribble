@@ -4,14 +4,27 @@ import { getYjsDoc } from "@syncedstore/core";
 import { storedAtom } from "~/hooks/localAtom";
 import syncedStore from "@syncedstore/core";
 import { WebrtcProvider } from "y-webrtc";
+import { WebsocketProvider } from "y-websocket";
 import { imageData } from "~/utils/imageData";
+import {avatars} from "~/constants/avatars";
 
 export const meta = {
     name: "Wordoodle",
     description: "Play Wordoodle with your friends",
     link: "https://wordoodle.vercel.app/",
-
 } 
+
+
+
+const randomAvatar = () => {
+    const idx = Math.random() * avatars.length;
+    return avatars[Math.floor(idx)] as AvatarName;
+}
+  
+const getRandomUser = () => {
+    const idx = Math.floor(Math.random() * 200).toString().padStart(3, "0");
+    return `user-${idx}`;
+}
 
 
 type Me = {
@@ -21,27 +34,25 @@ type Me = {
 }
 export const player = storedAtom<Me>({
     id: "",
-    name: "",
-    avatar: "arab"
-}, {prefix: "_Wordoodle_"});
+    name: getRandomUser(),
+    avatar: randomAvatar()
+}, {prefix: "_wordoodle_"});
 
 
 
 export const store = syncedStore({ state: {} as State}) as {state: State};
 const doc = getYjsDoc(store);
 
-
-
-const rooms = new Map<string, WebrtcProvider>();
+const rooms = new Map<string, WebsocketProvider>();
 
 
 export const connect = (roomId: string) => {
     if (rooms.has(roomId)) {
         return rooms.get(roomId)!;
     }
-    const rtc = new WebrtcProvider(roomId, doc, {
-        signaling: ['wss://demos.yjs.dev/ws']
-    });
+    const rtc = new WebsocketProvider('wss://demos.yjs.dev/ws', roomId, doc, );
+    // const  { id, avatar, name} = player.atom.get()
+
     rooms.set(roomId, rtc);
     return rtc;
 }

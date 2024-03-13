@@ -4,16 +4,9 @@ import { getRandomWords } from "./words";
 import { store, Events, Player, connect, player, Event } from "~/constants/game";
 import { SignalingConn } from "y-webrtc";
 
+import { observeDeep } from "@syncedstore/core";
 
-export const randomAvatar = () => {
-    const idx = Math.random() * avatars.length;
-    return avatars[Math.floor(idx)] as AvatarName;
-}
-  
-export const getRandomUser = () => {
-    const idx = Math.floor(Math.random() * 200).toString().padStart(3, "0");
-    return `user-${idx}`;
-}
+
 
 
 const actions: Events =  {
@@ -49,7 +42,6 @@ const actions: Events =  {
 
     join: ({ payload })=>{
         const rtc = connect(payload.roomId);
-        const signalingConn = rtc.signalingConns[0] as SignalingConn;
         player.atom.set({...player.atom.get(), id: payload.id});
         if (store.state.context.owner === "") {
             store.state.context.owner = payload.id;
@@ -145,3 +137,11 @@ export const useGameSyncedStore = () => {
     return {state, send, gameLoop, me, is} as const;
 };
 
+
+/* observeDeep(store, ()=>{
+    console.log(JSON.parse(JSON.stringify(store.state, null, 2)) as typeof store.state)
+    Object.entries(store.state.context.players).forEach(([id, player])=>{
+        console.log(`${id}, ${id === store.state.context.owner ? "owner" : "player"}`)
+    })    
+
+}) */
