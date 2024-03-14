@@ -1,104 +1,76 @@
 "use client";
-import { useRef,  useEffect, useLayoutEffect, DOMAttributes, useState } from "react";
-import { useCanvas } from "~/hooks/useCanvas";
-import { Action } from "~/constants/draw";
+import { useEffect, PointerEventHandler, useRef } from "react";
 import Toolbar from "./toolbar";
 import { cn } from "~/utils/cn";
 import { useGameSyncedStore } from "~/data/gameStore";
-import { putImage, getImage } from "~/utils/imageData";
+import { getStroke } from 'perfect-freehand'
+import { Paths, Point } from "~/constants/draw";
+import { getSvgPathFromStroke } from "~/utils/svgPath";
 
 const Canvas = () => {
-    const {is, send, state: store, me} = useGameSyncedStore()  
+    const {is, send, state, me} = useGameSyncedStore()  
     const min = 20;
     const max = 100;
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [state, dispatch] = useCanvas(canvasRef, {
-    color: "#000000",
-    width: Number(min),
-    drawing: false,
-    x: 0,
-    y: 0,
-    history: [],
-    historyIndex: -1,
-  });
 
-type ME = React.MouseEvent<HTMLCanvasElement, MouseEvent>;
-type TE = React.TouchEvent<HTMLCanvasElement>;
+    const ref = useRef<SVGSVGElement>(null);
 
+  const onPointerDown: PointerEventHandler<SVGSVGElement> = (e) => {
+    // @ts-ignore
+    e.target.setPointerCapture(e.pointerId);
+    const point = [e.pageX, e.pageY, e.pressure] as Point;
+    state.canvas.points = [point]
+  }
 
-const dispatchers =   {
+  const onPointerMove: PointerEventHandler<SVGSVGElement> = (e) =>  {
+    if (e.buttons !== 1) return;
+    state.canvas.points.push([e.pageX, e.pageY, e.pressure])
+  }
 
-    onMouseDown: (e: ME) => {
-      e.preventDefault();
-      dispatch({
-        action: "START",
-        payload: { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY, event: "mouseDown" },
-      })
-  },
-    onMouseUp: (e:ME) => {
-      e.preventDefault();
-      dispatch({ action: "STOP", payload: {event: "mouseUp", } })
-    },
-    onMouseMove: (e: ME) => {
-      e.preventDefault();
-      dispatch({
-        action: "DRAW",
-        payload: { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY, event: "mouseMove" }
-      })
-    },
-    onTouchStart: (e: TE) => {
-      e.preventDefault();
-      dispatch({
-        action: "START",
-        payload: { x: e.touches[0]?.clientX, y: e.touches[0]?.clientY, event: "touchStart" },
-      });
-    }, 
-    onTouchMove: (e: TE) => {
-      dispatch({
-        action: "DRAW",
-        payload: { x: e.touches[0]?.clientX, y: e.touches[0]?.clientY, event: "touchMove" },
-      });
-    }, 
-    onTouchEnd: (e:TE) => {
-      e.preventDefault();
-      dispatch({ action: "STOP", payload: {event: "touchEnd"} });
-    },
-    };
+  const  onPointerUp: PointerEventHandler<SVGSVGElement> = (e) => {
+    // @ts-ignore
+    const normalize = (value) => JSON.parse(JSON.stringify(value))
+    // @ts-ignore
+    e.target.releasePointerCapture(e.pointerId)
+    state.canvas.paths.push([normalize(state.canvas.points), normalize(state.canvas.opts)])
+    state.canvas.points = []
+  }
 
+  const stroke = getStroke(state.canvas.points, state.canvas.opts);
+  const pathData = getSvgPathFromStroke(stroke)
+  const handlers: any = is("myturn") ? {
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+  } : {};
 
-    useLayoutEffect(() => {
-      const canvas = canvasRef.current as HTMLCanvasElement;
-      const { width, height } = canvas.getBoundingClientRect()
-      canvas.width = width
-      canvas.height = height
-    }, []);
-
-    useEffect(() => {
-      if (!is("myturn") && store.context.canvas){
-        const canvas = canvasRef.current as HTMLCanvasElement;
-        const ctx = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
-        // putImage(store.context.canvas, ctx);  
-        console.log("image recived by ", me)
-      }
-    }, [store.context.canvas])
+  useEffect(() => {
+  }, [])
   
   return (
 
-      <div className="relative col-span-4 lg:col-span-2  flex place-content-center place-items-center aspect-video">
+      <div className="relative col-span-4 lg:col-span-2  flex place-content-center place-items-center aspect-video shrink">
         { is("myturn") && (<Toolbar className={cn({
-          " pointer-events-none" : state.drawing
-        })} state={state} dispatch={dispatch} min={min} max={max}/>)}
-        <canvas
-          className={cn("w-full h-full cursor-crosshair aspect-video rounded-lg " , {
-            "cursor-not-allowed": !is("myturn")
-          })}
-          {...(is("myturn"))? dispatchers : {}}
-          ref={canvasRef}
-          
-          style={{ border: "1px solid black", backgroundColor: "white", aspectRatio: "16/9" }}
-          width={"100%"}
-          height={"100%"}
-        />
+          " pointer-events-none" : !is("myturn")
+        })} min={min} max={max}/>)}
+    <svg
+      ref={ref}
+      className='w-full h-full rounded-md bg-white aspect-video '
+      style={{ touchAction: 'none' }}
+      {...handlers}
+    >
+      {
+        state.canvas.paths.map((path, i) => {
+          const [pts, options] = path
+          const stroke = getStroke(pts, options);
+          const d = getSvgPathFromStroke(stroke);
+          return (
+            <path key={i} fill={options.color} opacity={options.opacity} d={d}/>
+          )
+      })
+      }
+      <path fill={state.canvas.opts.color} d={pathData} opacity={state.canvas.opts.opacity} />
+
+    </svg>
       </div>
   );
 };

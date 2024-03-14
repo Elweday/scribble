@@ -19,7 +19,7 @@ import { cn } from "~/utils/cn";
     const setAvatar  = (a: AvatarName) => player.set("avatar", a)
     const [idx, setIdx] = useState(avatars.indexOf(avatar))
     useEffect(() => {
-      api?.scrollTo(avatars.indexOf(avatar), true)
+      api?.scrollTo(avatars.indexOf(avatar))
       api?.on("select", () => {
         const idx = api.selectedScrollSnap();
         setIdx(idx)
@@ -31,7 +31,7 @@ import { cn } from "~/utils/cn";
       <CarouselContent >
         {avatars.map((av, i) => (
           <CarouselItem  key={av} className="flex py-5 w-full place-content-center place-items-center basis-1/5">
-            <div className={cn(" transition-all",{
+            <div className={cn(" transition-all ",{
               "scale-[2] duration-500": idx === i
             })}>
             <Avatar key={av} size="xl" avatar={av} />

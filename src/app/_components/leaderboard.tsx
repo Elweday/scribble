@@ -17,25 +17,22 @@ export default function Leaderboard() {
           <DialogDescription>
             <div className="flex flex-col gap-2">
             <div className="flex flex-col gap-2">
-            <div className=" space-y-0 ">
               
               <p>
-                ({players.map(([_, player]) => player.guessed).length} / {players.length})
+                ({players.map(([_, player]) => player.guessed).length -1 } / {players.length -1})
                 The word was <span className="font-bold text-purple-200"> {state.context?.currentWord} </span> 
               </p>
 
-            </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="flex flex-wrap gap-2">
                 {players.sort(([i1, a], [i2, b]) => b.score - a.score).map(([id, player], index) => (
                   <div className={cn("flex gap-3 place-items-center place-content-center text-center justify-center ", {
-                    "col-span-3": index < 1,
                   })} key={index}>
                     <span className="flex flex-col place-content-center ">
-                      <Avatar size={index > 0 ? "small" : "large"}  rank={index + 1} avatar={player.avatar} />
+                      <Avatar size={"xl"}  rank={index + 1} avatar={player.avatar} />
                       <div className="flex place-items-center place-content-center">{player.name}</div>
+                     <span className=" text-lg font-bold">{player.score}</span>
                     </span>
                     
-                     <span className=" text-lg font-bold">{player.score}</span>
                     </div>
                 ))}
             </div>

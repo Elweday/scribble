@@ -1,12 +1,13 @@
 
 import { AvatarName } from "./avatars";
-import { getYjsDoc } from "@syncedstore/core";
+import { getYjsDoc, boxed, Box } from "@syncedstore/core";
 import { storedAtom } from "~/hooks/localAtom";
 import syncedStore from "@syncedstore/core";
 import { WebrtcProvider } from "y-webrtc";
 import { WebsocketProvider } from "y-websocket";
-import { imageData } from "~/utils/imageData";
 import {avatars} from "~/constants/avatars";
+import { Opts, Paths, Points } from "./draw";
+
 
 export const meta = {
     name: "Wordoodle",
@@ -98,7 +99,6 @@ export type Context = {
   guesses: Guess[];
   wordOptions: string[];
   owner: string;
-  canvas: imageData | null;
 }
 
 export type Event = (
@@ -109,7 +109,6 @@ export type Event = (
 | { type: "leave"; id: string }
 | { type: "set_me"; id: string; }
 | { type: "start_round"; }
-| { type: "end_round" }
 | { type: "choose_word"; word: string; }
 | { type: "get_words" }
 | { type: "pick_random_word" }
@@ -119,7 +118,11 @@ export type Event = (
 | { type: "end_game" }
 | { type: "end_round" }
 | { type: "decrement_time" }
-| { type: "draw"; img: imageData }
+| { type: "done" }
+| { type: "add_path" }
+| { type: "clear_canvas" }
+| { type: "undo" }
+| { type: "draw"; paths: Paths[0] } 
 )
 
 
@@ -135,10 +138,28 @@ export type Events = Partial<{
 export type State = {
     value: StateValue;
     context: Context;
+    canvas: {
+        paths: Paths,
+        points: Points,
+        opts: Opts
+      };
+    
+}
+
+const defaultOpts = {
+    color: "#fffff",
+    size: 15,
+    thinning: 0,
+    opacity: 1,
 }
 
 export const initialState: State = {
     value: "lobby",
+    canvas: {
+        paths: [[ [] , defaultOpts]],
+        points: [],
+        opts: defaultOpts,
+    },
     context: {
         config: {
             maxPlayers: 8,
@@ -148,7 +169,6 @@ export const initialState: State = {
             difficulty: "medium",
             locale: "en",
         },
-        canvas: null,
         gameId: "",
         players: {},
         guesses: [],
@@ -163,6 +183,7 @@ export const initialState: State = {
 
 store.state.context = initialState.context;
 store.state.value = initialState.value;
+store.state.canvas = initialState.canvas;
 
 player.atom.subscribe(({id, avatar, name})=>{
     if (store.state.context.players[id]) {

@@ -1,6 +1,7 @@
 "use client";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog"
 import { useState, useEffect } from "react";
+import { Player } from "~/constants/game";
 import { useGameSyncedStore } from "~/data/gameStore";
 export default function WordChoosing() {
   const {state, send, me, is} = useGameSyncedStore();
@@ -17,15 +18,17 @@ export default function WordChoosing() {
         if (is("round.running")) return;
         send({type: "pick_random_word"})
         send({type: "start_round" })
-      }, 5000)
+      }, 10000)
     }, [])
+
+    const player = state.context.players[state.context.currentDrawer] as Player;
     return (
     <Dialog open={open}>
       <DialogContent  className="z-[999] p-5 w-[80%] rounded bg-purple-950/80">
         <DialogHeader>
           <DialogTitle className="flex justify-between place-items-center place-content-center">
-            <span>{isMyTurn? 
-            "Pick a word.": "Waiting for the drawer to pick a word."}</span>
+            <span>{(isMyTurn) ? 
+            "Pick a word.": `Waiting for player to pick a word.`}</span>
           </DialogTitle>
           <DialogDescription>
           {isMyTurn&& 

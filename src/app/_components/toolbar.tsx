@@ -2,18 +2,20 @@
 import { useState } from "react";
 import { COLOR_PALETTE, type State, type Action } from "~/constants/draw";
 import { cn } from "~/utils/cn";
+import { useGameSyncedStore } from "~/data/gameStore";
+import { Slider } from "./ui/slider";
 
 type Props = {
-    state: State;
-    dispatch: (action: Action) => void;
     min: number;
     max: number;
     className?: string;
 };
 
 export default  (props : Props) => {
-    const {min, max, state, dispatch} = props;
+    const {min, max } = props;
     const [widthShown, setWidthShown] = useState(false);
+    const {state} = useGameSyncedStore();
+    
     return (    
     <div
     id="toolbar"
@@ -23,11 +25,11 @@ export default  (props : Props) => {
         className="transition-all hover:scale-110  rounded-full overflow-hidden border-2 border-gray-900"
     >
     <input
-      value={state.color}
+      value={state.canvas.opts.color}
       type="color"
       className="origin-center scale-[2] w-full h-full"
       onChange={(e) =>
-        dispatch({ action: "COLOR", payload: { color: e.target.value } })
+        state.canvas.opts.color = e.target.value
     }
     />
     </button>
@@ -36,12 +38,12 @@ export default  (props : Props) => {
         className="transition-all hover:scale-110 z-50 "
         key={index}
         style={{ backgroundColor: color }}
-        onClick={() => dispatch({ action: "COLOR", payload: { color } })}
+        onClick={() => state.canvas.opts.color = color}
       />
     ))}
     <button
       className="transition-all hover:scale-110 bg-black/10"
-      onClick={() => dispatch({ action: "CLEAR" })}
+      onClick={() => state.canvas.paths = []}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -66,24 +68,49 @@ export default  (props : Props) => {
 	<path fill="currentColor" d="M6 21q-1.125 0-2.225-.55T2 19q.65 0 1.325-.513T4 17q0-1.25.875-2.125T7 14q1.25 0 2.125.875T10 17q0 1.65-1.175 2.825T6 21m5.75-6L9 12.25l8.95-8.95q.275-.275.688-.288t.712.288l1.35 1.35q.3.3.3.7t-.3.7z"></path>
 </svg>
       {widthShown && (
-        
-      <input
-        className="min-w-[100px] w-full  absolute left-0 -bottom-8"
-        type="range"
-        min={min}
-        max={max}
-        value={state.width}
-        onChange={(e) =>
-          dispatch({
-            action: "WIDTH",
-            payload: { width: Number(e.target.value) },
-          })
-        }
-        id="myRange"
-      />
+
+      <div className="absolute -right-20 top-7 bg-black/50 p-2 rounded-lg h-40 w-40 flex flex-col gap-3 *:w-full">
+        <div className="flex flex-col text-xs text-start place-self-start text-white">
+          <label htmlFor="width-slider">Width</label>
+          <Slider
+            id="width-slider"
+            defaultValue={[state.canvas.opts.size]}
+            min={min}
+            max={max}
+            onValueChange={([value]) => state.canvas.opts.size = Number(value)}
+          />
+        </div>
+        <div className="flex flex-col text-xs text-start place-self-start text-white">
+          <label htmlFor="smoothing-slider">thinning</label>
+          <Slider
+            id="thinning-slider"
+            defaultValue={[state.canvas.opts.thinning]}
+            min={0}
+            max={1}
+            step={0.01}
+            onValueChange={([value]) => state.canvas.opts.thinning = Number(value)}
+          />
+        </div>
+
+        <div className="flex flex-col text-xs text-start place-self-start text-white">
+          <label htmlFor="opacity-slider">opacity</label>
+          <Slider
+            id="thinning-slider"
+            defaultValue={[state.canvas.opts.opacity]}
+            min={0}
+            max={1}
+            step={0.01}
+            onValueChange={([value]) => state.canvas.opts.opacity = Number(value)}
+          />
+        </div>
+
+        </div>
       )}
       </button>
-      <button className="transition-all hover:scale-110 bg-black/10" onClick={() => dispatch({ action: "UNDO" })}>
+      <button onClick={ ()=> {
+        try { state.canvas.paths.pop() } catch (error) {}
+        
+      }} className="transition-all hover:scale-110 bg-black/10" >
       <svg className="lg:size-20 size-8" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24">
       <path fill="currentColor" d="M1 8.5L8 14v-4h1c4 0 7 2 7 6v1h3v-1c0-6-5-9-10-9H8V3z"></path>
 </svg>

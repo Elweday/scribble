@@ -49,7 +49,8 @@ export const Players = () => {
                     <Avatar rank={lobby ? undefined: index + 1} size="large" avatar={avatar} />
                     <p className="flex flex-col place-self-center">
                         <span className={cn("font-bold text-xs lg:text-md", {
-                            "text-green-500":  guessed && !lobby
+                            "text-green-500":  guessed && !lobby,
+                            "text-purple-500": state.context.currentDrawer === id && !lobby
                         })}>{name}</span>
                         {!lobby ? <span className="text-xs">{score}</span> : null}
                     </p>

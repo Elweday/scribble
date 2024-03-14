@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Box } from "@syncedstore/core";
 
 export const GAME_ID_LENGTH = 10;
 // convert this type to zod 
@@ -37,3 +38,15 @@ export const actionSchema = z.object({
 
 export type Action = z.infer<typeof actionSchema>
 
+export type Point = [number, number, number]
+
+export type Points = Point[]
+
+export type Paths = [Points, Opts][]
+
+export type Opts = {
+  size: number,
+  thinning: number,
+  color: string,
+  opacity: number,
+}
