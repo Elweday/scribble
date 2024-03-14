@@ -38,6 +38,6 @@
     "**/*.cjs",
     "**/*.js",
     ".next/types/**/*.ts"
-  ],
+, "src/app/drawer/page.jsx"  ],
   "exclude": ["node_modules"]
 }

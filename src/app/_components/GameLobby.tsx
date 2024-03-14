@@ -13,7 +13,6 @@ export default function GameLobby(props: { gameId: string }) {
   
   noStore();
   const url = meta.link + props.gameId;
-  const [open, setOpen] = useState(false);
   return (
     
     <main className="place-content-center  place-items-center flex w-full h-full ">

@@ -39,7 +39,10 @@ export const player = storedAtom<Me>({
     avatar: randomAvatar()
 }, {prefix: "_wordoodle_"});
 
-
+export const delays = {
+    "word_choosing": 15000,
+    "leaderboard" : 5000,
+}
 
 export const store = syncedStore({ state: {} as State}) as {state: State};
 const doc = getYjsDoc(store);
@@ -99,6 +102,7 @@ export type Context = {
   guesses: Guess[];
   wordOptions: string[];
   owner: string;
+  word_choosing_time: number;
 }
 
 export type Event = (
@@ -123,6 +127,10 @@ export type Event = (
 | { type: "clear_canvas" }
 | { type: "undo" }
 | { type: "draw"; paths: Paths[0] } 
+| { type: "start_word_choosing" }
+| { type: "update_scores" }
+| { type: "update_drawer" }
+| { type: "reset_players" }
 )
 
 
@@ -178,6 +186,7 @@ export const initialState: State = {
         currentWord: "",
         currentDrawer: "",
         owner: "",
+        word_choosing_time: delays.word_choosing / 1000
     }
 };
 

@@ -5,16 +5,6 @@ import { useGameSyncedStore } from "~/data/gameStore";
 
 
 
-const floodFill = (ctx: CanvasRenderingContext2D, x: number, y: number, oldColor: string, newColor: string) => {
-  const color = ctx.getImageData(x, y, 1, 1).data
-  if (color[0] === oldColor[0] && color[1] === oldColor[1] && color[2] === oldColor[2]) {
-    ctx.putImageData(ctx.getImageData(x, y, 1, 1), x, y);
-    floodFill(ctx, x, y - 1, oldColor, newColor);
-    floodFill(ctx, x, y + 1, oldColor, newColor);
-    floodFill(ctx, x - 1, y, oldColor, newColor);
-    floodFill(ctx, x + 1, y, oldColor, newColor);
-  }
-}
 
 const makeReducerFunc = (canvasRef:RefObject<HTMLCanvasElement>) => (state: State, {action, payload}: Action) => {
     let {x, y, width, color, drawing, history, historyIndex} = {...state, ...payload};

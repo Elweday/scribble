@@ -22,9 +22,9 @@ export default function NameForm() {
         <div className="flex flex-col gap-5">
         <div className="flex flex-col w-full gap-2 place-content-center place-items-center mx-auto ">
         <EditForm />
-        <button className="px-4 py-4 rounded-lg bg-green-700 hover:bg-green-800 hover:scale-[1.02] transition-all">Start Game!</button>
-        <div className="flex flex-row  gap-2 place-content-center place-items-center">
-        <button onClick={createRoom} className="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 hover:scale-[1.02] transition-all w-full">Create Room!</button>
+        <button className="px-4 w-full py-4 rounded-lg bg-green-700 hover:bg-green-800 hover:scale-[1.02] transition-all">Start Game!</button>
+        <div className="flex flex-row  gap-2 place-content-center place-items-center w-full">
+        <button onClick={createRoom} className="px-4 py-2 w-full rounded-lg bg-blue-700 hover:bg-blue-800 hover:scale-[1.02] transition-all ">Create Room!</button>
         <label className=" w-fit inline-flex items-center cursor-pointer">
         <input onChange={() => setIsPublic(!isPublic)} type="checkbox" value=""  className="sr-only peer group" />
                 <span className=" flex place-items-center place-content-center inset-0 peer-checked:border-white  peer-checked:bg-green-400/30 bg-red-400/30   rounded-md lg:size-12 size-10 transition-all  *:text-red-400  *:peer-checked:text-green-400" >

@@ -6,7 +6,7 @@ export default function EditForm() {
   const {name} = player.use()
   const setName  = (n: string) => player.set("name", n)
   return (
-    <div className="flex flex-col gap-5 w-full h-full  place-self-center ">
+    <div className="flex flex-col gap-5 w-full h-full  place-self-center  place-items-center">
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}

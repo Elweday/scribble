@@ -10,19 +10,16 @@ import { v4 as uuidv4 } from "uuid";
 import { player } from "~/constants/game";
 
 export default function Home(props : {gameId: string}) {
-  const {state, send, gameLoop, is} = useGameSyncedStore();
+  const {state, send, is} = useGameSyncedStore();
   const {avatar, name} = player.use()
   const id = useRef(uuidv4());
-  const gameLoopRef = useRef(false);
+  
   const addPlayer = useCallback(() => {
     send({type: "join", name, avatar, roomId: props.gameId, id: id.current})
   }, [state.context.players])
 
   useEffect(function onJoin(){
       addPlayer();
-      !gameLoopRef.current && gameLoop();
-      gameLoopRef.current = true;
-
   }, [state.context.players])
 
   useEffect(() => {

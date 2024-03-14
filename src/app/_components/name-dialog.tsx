@@ -9,9 +9,7 @@ return (
   <DialogContent  className="z-[999] w-[90%] flex place-content-center  lg:w-full rounded bg-purple-950/80 ">
     <DialogHeader>
       <DialogTitle className="flex justify-between place-items-center place-content-center">
-        <span>
             What's your name?
-            </span>
             <DialogTrigger onClick={() => {
               props.setOpen(false)
             }}  >
@@ -23,6 +21,6 @@ return (
       </DialogDescription>
     </DialogHeader>
   </DialogContent>
-</Dialog>)
-
+</Dialog>
+)
 }

@@ -23,7 +23,7 @@ export default function Leaderboard() {
                 The word was <span className="font-bold text-purple-200"> {state.context?.currentWord} </span> 
               </p>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 justify-center">
                 {players.sort(([i1, a], [i2, b]) => b.score - a.score).map(([id, player], index) => (
                   <div className={cn("flex gap-3 place-items-center place-content-center text-center justify-center ", {
                   })} key={index}>
@@ -37,7 +37,7 @@ export default function Leaderboard() {
                 ))}
             </div>
             </div>
-            {state.value == "done" && 
+            {state.value === "done" && 
               <button className="rounded-md bg-white/10 py-2 px-3 place-content-center place-items-center flex font-semibold transition hover:bg-white/20 hover:scale-[1.02]" onClick={() => send({ type: "start_game", gameId: state.context.gameId })}>Play Again!</button>
             }
 

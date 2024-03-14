@@ -33,8 +33,8 @@ function PlayersIcon() {
 
 export default (props: {gameId: string}) => {
   const {state, send, is} = useGameSyncedStore();
-  const canStart = is("can_start");
   const isOwner = is("owner")
+  const canStart = is("enough_players") && isOwner;
 
   return (
     <div className="grid grid-cols-2 gap-3 w-full ">
