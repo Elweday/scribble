@@ -27,7 +27,7 @@ import { cn } from "~/utils/cn";
       })
     }, [api])
     
-    return (<Carousel setApi={setApi} opts={{ loop: true }} className="block w-full place-content-center place-items-center">
+    return (<Carousel setApi={setApi} opts={{ loop: true }} className="block w-full place-content-center place-items-center max-w-80">
       <CarouselContent >
         {avatars.map((av, i) => (
           <CarouselItem  key={av} className="flex py-5 w-full place-content-center place-items-center basis-1/5">

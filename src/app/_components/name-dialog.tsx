@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 export default function EditDialog(props: {open: boolean, setOpen: (open: boolean) => void}) {
 return (
 <Dialog open={props.open}>
-  <DialogContent  className="z-[999] w-[20rem] lg:w-full rounded bg-purple-950/80 ">
+  <DialogContent  className="z-[999] w-[90%] flex place-content-center  lg:w-full rounded bg-purple-950/80 ">
     <DialogHeader>
       <DialogTitle className="flex justify-between place-items-center place-content-center">
         <span>
@@ -18,7 +18,7 @@ return (
               <button className="aspect-square  flex place-self-end" ><X /></button>
             </DialogTrigger>
       </DialogTitle>
-      <DialogDescription  className=" flex place-content-center place-items-center w-[16.8rem]">
+      <DialogDescription  className=" flex place-content-center place-items-center w-full">
         <EditForm />
       </DialogDescription>
     </DialogHeader>

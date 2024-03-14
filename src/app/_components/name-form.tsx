@@ -20,7 +20,7 @@ export default function NameForm() {
     return (
         
         <div className="flex flex-col gap-5">
-        <div className="flex flex-col w-full gap-2 place-content-center place-items-stretch">
+        <div className="flex flex-col w-full gap-2 place-content-center place-items-center mx-auto ">
         <EditForm />
         <button className="px-4 py-4 rounded-lg bg-green-700 hover:bg-green-800 hover:scale-[1.02] transition-all">Start Game!</button>
         <div className="flex flex-row  gap-2 place-content-center place-items-center">

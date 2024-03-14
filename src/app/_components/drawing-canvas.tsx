@@ -17,7 +17,7 @@ const Canvas = () => {
   const onPointerDown: PointerEventHandler<SVGSVGElement> = (e) => {
     // @ts-ignore
     e.target.setPointerCapture(e.pointerId);
-    const point = [e.pageX, e.pageY, e.pressure] as Point;
+    const point = [e.pageX , e.pageY, e.pressure] as Point;
     state.canvas.points = [point]
   }
 
@@ -48,11 +48,12 @@ const Canvas = () => {
   
   return (
 
-      <div className="relative col-span-4 lg:col-span-2  flex place-content-center place-items-center aspect-video shrink">
+      <div className="relative col-span-4 lg:col-span-2  flex place-content-center place-items-center aspect-video">
         { is("myturn") && (<Toolbar className={cn({
           " pointer-events-none" : !is("myturn")
         })} min={min} max={max}/>)}
     <svg
+    viewBox="0 0 600 600"
       ref={ref}
       className='w-full h-full rounded-md bg-white aspect-video '
       style={{ touchAction: 'none' }}
