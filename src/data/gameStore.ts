@@ -88,7 +88,8 @@ const actions: Events =  {
             if (store.state.context.remainingTime >= weighted_time){
                 player.score += MAX_SCORE
             } else {
-                player.score += BASE_SCORE * Math.exp(-0.02 * (store.state.context.config.roundTime - store.state.context.remainingTime));
+                const score = Math.round(BASE_SCORE * Math.exp(-0.02 * (store.state.context.config.roundTime - store.state.context.remainingTime)));
+                player.score += score;
             }
         });
     
