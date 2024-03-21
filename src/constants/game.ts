@@ -3,7 +3,6 @@ import { AvatarName } from "./avatars";
 import { getYjsDoc, boxed, Box } from "@syncedstore/core";
 import { storedAtom } from "~/hooks/localAtom";
 import syncedStore from "@syncedstore/core";
-import { WebrtcProvider } from "y-webrtc";
 import { WebsocketProvider } from "y-websocket";
 import {avatars} from "~/constants/avatars";
 import { Opts, Paths, Points } from "./draw";
@@ -32,11 +31,15 @@ type Me = {
     id: string;
     name: string;
     avatar: AvatarName;
+    error: string | null,
+    conn: WebsocketProvider | null, 
 }
-export const player = storedAtom<Me>({
+export const local = storedAtom<Me>({
     id: "",
     name: getRandomUser(),
-    avatar: randomAvatar()
+    avatar: randomAvatar(),
+    error: null,
+    conn: null
 }, {prefix: "_wordoodle_"});
 
 export const delays = {
@@ -54,11 +57,9 @@ export const connect = (roomId: string) => {
     if (rooms.has(roomId)) {
         return rooms.get(roomId)!;
     }
-    const rtc = new WebsocketProvider('wss://demos.yjs.dev/ws', roomId, doc, );
-    // const  { id, avatar, name} = player.atom.get()
-
-    rooms.set(roomId, rtc);
-    return rtc;
+    const conn = new WebsocketProvider('wss://demos.yjs.dev/ws', roomId, doc, );
+    rooms.set(roomId, conn);
+    local.set("conn", conn);
 }
 
 type StateValue = "lobby" | "game.word_choosing" | "game.running" | "game.round_ended" | "done" 
@@ -131,6 +132,8 @@ export type Event = (
 | { type: "update_scores" }
 | { type: "update_drawer" }
 | { type: "reset_players" }
+| { type: "create_room"; roomId: string; }
+| { type: "remove_room"; }
 )
 
 
@@ -194,7 +197,7 @@ store.state.context = initialState.context;
 store.state.value = initialState.value;
 store.state.canvas = initialState.canvas;
 
-player.atom.subscribe(({id, avatar, name})=>{
+local.atom.subscribe(({id, avatar, name})=>{
     if (store.state.context.players[id]) {
         // @ts-ignore
         store.state.context.players[id].avatar = avatar

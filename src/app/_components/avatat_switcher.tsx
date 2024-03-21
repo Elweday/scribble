@@ -10,13 +10,13 @@ import {
   import { useEffect, useState } from "react"
   import { avatars, AvatarName } from "~/constants/avatars";
   import { Avatar } from "./avatar"
-  import { player } from "~/constants/game";
+  import { local } from "~/constants/game";
 import { cn } from "~/utils/cn";
 
   export const AvatarSwitcher =  () =>{
     const [api, setApi] = useState<CarouselApi>()
-    const {avatar} = player.use()
-    const setAvatar  = (a: AvatarName) => player.set("avatar", a)
+    const {avatar} = local.use()
+    const setAvatar  = (a: AvatarName) => local.set("avatar", a)
     const [idx, setIdx] = useState(avatars.indexOf(avatar))
     useEffect(() => {
       api?.scrollTo(avatars.indexOf(avatar))

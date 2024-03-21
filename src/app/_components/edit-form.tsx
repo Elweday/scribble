@@ -1,10 +1,10 @@
 "use client";
 import { AvatarSwitcher } from "./avatat_switcher";
-import { player } from "~/constants/game";
+import { local } from "~/constants/game";
 
 export default function EditForm() {
-  const {name} = player.use()
-  const setName  = (n: string) => player.set("name", n)
+  const {name} = local.use()
+  const setName  = (n: string) => local.set("name", n)
   return (
     <div className="flex flex-col gap-5 w-full h-full  place-self-center  place-items-center">
       <input

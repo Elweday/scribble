@@ -5,7 +5,7 @@ import { Avatar } from "./avatar";
 import { useGameSyncedStore } from "~/data/gameStore";
 import EditDialog from "./name-dialog";
 import { ButtonHTMLAttributes, useState } from "react";
-import { player } from "~/constants/game";
+import { local } from "~/constants/game";
 
 
 import React from 'react';
@@ -33,7 +33,7 @@ export const Players = () => {
     const [open, setOpen] = useState(false);
     const lobby = state.value == "lobby";
     const players = Object.entries(state.context.players);
-    const p = player.use();
+    const p = local.use();
 
     return (
         <div className={cn("flex flex-col col-span-2 lg:col-span-1  w-full lg:gap-3 p-4   rounded-xl gap-2  relative bg-black/10 overflow-y-auto ", {

@@ -4,18 +4,17 @@ import { cn } from "~/utils/cn";
 import { useRouter } from 'next/navigation'
 import { useGameSyncedStore } from "~/data/gameStore";
 import EditForm from "./edit-form";
-import { player } from "~/constants/game";
 
 export default function NameForm() {
-    const { avatar, name} = player.use()
     const [isPublic, setIsPublic] = useState(true); 
     const { send }= useGameSyncedStore();
     const router = useRouter();
 
     const createRoom = (e: any) => {
         e.preventDefault()
-        const gameId = Math.random().toString(36).substring(2, 12);
-        typeof window !== 'undefined' && router.push(`/${gameId}`)
+        const roomId = Math.random().toString(36).substring(2, 12);
+        send({ type: "create_room", roomId })
+        typeof window !== 'undefined' && router.push(`/${roomId}`)
     }
     return (
         

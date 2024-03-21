@@ -40,6 +40,10 @@ export function storedAtom<T extends Record<string,any>>(initial: T, options?: O
     function set<K extends keyof T>(key: K, value: T[K]){
         atom.set({...atom.get(), [key]: value})
     }
+
+    function get<K extends keyof T>(key: K){
+        return atom.get()[key]
+    }
     
-    return {atom, set, use} as const;
+    return {atom, set, use, get} as const;
 }

@@ -1,7 +1,6 @@
 import { useSyncedStore, } from "@syncedstore/react";
-
 import { getRandomWords } from "./words";
-import { store, Events, Player, connect, player, Event, initialState, delays } from "~/constants/game";
+import { store, Events, Player, connect, local, Event, initialState, delays } from "~/constants/game";
 import { observeDeep } from "@syncedstore/core";
 
 function oneOf<T>(items: T[]){
@@ -30,10 +29,10 @@ function repeat(params: {run: () => void, every: number, untill: Guard}){
 const guards = (state: typeof store.state) => ({
     "round_running": () => state.value === "game.running" && state.context.remainingTime > 0,
     "game_running": () => state.value === "game.running",
-    "myturn": () =>  state.context.currentDrawer === player.atom.get().id,
+    "myturn": () =>  state.context.currentDrawer === local.atom.get().id,
     "leaderboard": () => state.value == "game.round_ended" || state.value == "done",
     "lobby": () => state.value === "lobby",
-    "owner": () => state.context.owner === player.atom.get().id,
+    "owner": () => state.context.owner === local.atom.get().id,
     "all_guessed": () => Object.entries(state.context.players).filter(([id, _])=>id !== state.context.currentDrawer).every(([_, p])=>p.guessed),
     "time_up": () => state.context.remainingTime <= 0,
     "round_over": () =>  state.value === "game.round_ended",
@@ -49,6 +48,11 @@ const guards = (state: typeof store.state) => ({
 
 
 const actions: Events =  {
+    create_room: ({ payload }) => {
+        store.state.context.gameId = payload.roomId;  
+        store.state.context.owner = local.get("id");
+        local.set("error", null); 
+    },
     start_game: ({ payload }) => {
         store.state.context.gameId = payload.gameId
         store.state.context.currentDrawer = store.state.context.owner
@@ -73,16 +77,9 @@ const actions: Events =  {
             .filter(([id, player])=> player.guessed && (id !== store.state.context.currentDrawer))
             .sort(([__,  a], [_, b])=> ((a.timeStamp as number ) -( b.timeStamp as number)));
         const nguessers = guessers.length;
-/*         def calculate_score(time_remaining, max_score=MAX_SCORE, total_time=MAX_TIME, threshold=THRESHOLD):
-            weighted_time = (1-threshold) * total_time
-            if time_remaining >= weighted_time:
-                return max_score
-            else:
-                score = max_score * math.exp(-0.02 * (total_time - time_remaining))
-                return max(0, round(score)) 
-            
- */     const THRESHOLD = 0.15;
+        const THRESHOLD = 0.15;
         const MAX_SCORE = 400;
+
         guessers.forEach(([id, player], idx)=>{
             const weighted_time = (1-THRESHOLD) * store.state.context.config.roundTime;
             if (store.state.context.remainingTime >= weighted_time){
@@ -140,21 +137,19 @@ const actions: Events =  {
         send( { type: "choose_word", word: oneOf(store.state.context.wordOptions) } )
     },
     join: ({ payload })=>{
+        local.set("id", payload.id);
         connect(payload.roomId);
-        player.atom.set({...player.atom.get(), id: payload.id});
-        if (store.state.context.owner === "") {
-            store.state.context.owner = payload.id;
-        }
         store.state.context.players[payload.id] = { name: payload.name, avatar: payload.avatar, score: 0, guessed: false };
     },
     leave: ({ payload }) => {
-        const id = player.atom.get().id;
+        const id = local.get("id");
         const isOwner = store.state.context.owner === id;
         if (isOwner) {
             const owner = Object.keys(store.state.context.players).find((id)=>id!== store.state.context.owner) as string;
             store.state.context.owner = owner;
         }
         Object.hasOwn(store.state.context.players, id) ? delete store.state.context.players[id] : null;
+        local.get("conn")?.disconnect();
     },
     rate_drawing: ({  payload }) => {
         (store.state.context.players[payload.player_id] as Player).drawingRating = payload.rating;
@@ -183,6 +178,11 @@ const actions: Events =  {
         context.wordOptions = getRandomWords(3);
         context.word_choosing_time = delays.word_choosing / 1000;
         store.state.value = "game.word_choosing";
+    },
+    remove_room: () => {
+        const conn = local.get("conn");
+        conn?.doc.destroy();
+        conn?.destroy();
     }
 }
 
@@ -200,9 +200,6 @@ const send = (event: Event) => {
 }
 
 const waitFor = (delay: keyof typeof delays) => (cb: () => void) =>  setTimeout(cb, delays[delay])
-
-
-
 
 const rules: Record<string, () => boolean> = {
     "ENSURE_PLAYERS_COUNT": () => {
@@ -234,20 +231,27 @@ const rules: Record<string, () => boolean> = {
         }
         return false
     },
+    "ENSURE_DESTROYED": () => {
+        if (!is("has_players")) {
+            setTimeout(() => {
+                if (!is("has_players")) {
+                    send({ type: "remove_room" });
+                }
+                return true
+            }, 5000)
+        }
+        return false
+    }
 }
-
-
 
 observeDeep(store, ()=>{
     Object.entries(rules).forEach(([ruleName, rule]) => {
         const success = rule()
         if (success) {
             console.log(" Game rule succeeded ", ruleName)
-
         }
     });
 })
-
 
 export const useGameSyncedStore = () => {
     const { state } = useSyncedStore(store);
@@ -257,7 +261,7 @@ export const useGameSyncedStore = () => {
         const cond = conds[key]
         return cond ? cond() : false
     };
-    const me = player.use();
+    const me = local.use();
 
     return {state, send, me, is} as const;
 };

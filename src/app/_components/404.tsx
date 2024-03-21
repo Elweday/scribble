@@ -1,10 +1,11 @@
 
-export default  function Error404() {
+export default  function Error(props: {
+  code?: number
+  message: string
+}) {
   return (
-    <main className="w-full h-full place-content-center place-items-center">
       <div className=" flex w-full h-full  place-self-center text-2xl  flex-col gap-3 place-content-center place-items-center ">
-        Sorry, Game Not Found
+        {props.message}
     </div>
-    </main>
   );
 }
