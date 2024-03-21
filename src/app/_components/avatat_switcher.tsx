@@ -17,14 +17,13 @@ import { cn } from "~/utils/cn";
     const [api, setApi] = useState<CarouselApi>()
     const {avatar} = local.use()
     const setAvatar  = (a: AvatarName) => local.set("avatar", a)
-    const [idx, setIdx] = useState(avatars.indexOf(avatar))
+    const currentIndex = avatars.indexOf(avatar);
     useEffect(() => {
-      api?.scrollTo(avatars.indexOf(avatar))
-      api?.on("select", () => {
+      api?.on("scroll", () => {
         const idx = api.selectedScrollSnap();
-        setIdx(idx)
         setAvatar(avatars[idx] as AvatarName)
       })
+      api?.scrollTo(currentIndex)
     }, [api])
     
     return (<Carousel setApi={setApi} opts={{ loop: true }} className="block w-full place-content-center place-items-center max-w-80">
@@ -32,9 +31,9 @@ import { cn } from "~/utils/cn";
         {avatars.map((av, i) => (
           <CarouselItem  key={av} className="flex py-5 w-full place-content-center place-items-center basis-1/5">
             <div className={cn(" transition-all ",{
-              "scale-[2] duration-500": idx === i
+              "scale-[2] duration-500": i === api?.selectedScrollSnap()
             })}>
-            <Avatar key={av} size="xl" avatar={av} />
+            <Avatar key={i} size="xl" avatar={av} />
             </div>  
           </CarouselItem>
         ))}
