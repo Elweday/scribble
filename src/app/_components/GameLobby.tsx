@@ -3,9 +3,6 @@ import { unstable_noStore as noStore } from "next/cache";
 import { Players } from "~/app/_components/players";
 import CopyToClipboard from "../_components/copy-to-clipboard";
 import StartGameForm from "./start-game-form";
-import { store } from "~/useGame";
-
-import { useState } from "react";
 import { meta } from "~/constants/game";
 
 export default function GameLobby(props: { gameId: string }) {

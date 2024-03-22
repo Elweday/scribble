@@ -6,6 +6,8 @@ import syncedStore from "@syncedstore/core";
 import { WebsocketProvider } from "y-websocket";
 import {avatars} from "~/constants/avatars";
 import { Opts, Paths, Points } from "./draw";
+import { v4 as uuidv4 } from "uuid";
+
 
 
 export const meta = {
@@ -27,20 +29,20 @@ const getRandomUser = () => {
 }
 
 
-type Me = {
+type Local = {
     id: string;
     name: string;
     avatar: AvatarName;
     error: string | null,
     conn: WebsocketProvider | null, 
 }
-export const local = storedAtom<Me>({
-    id: "",
+export const local = storedAtom<Local>({
+    id: uuidv4(),
     name: getRandomUser(),
     avatar: randomAvatar(),
     error: null,
     conn: null
-}, {prefix: "_wordoodle_"});
+}, {prefix: "_wordoodle_", storedKeys: ["avatar", "name", "id"]});
 
 export const delays = {
     "word_choosing": 15000,
@@ -50,15 +52,9 @@ export const delays = {
 export const store = syncedStore({ state: {} as State}) as {state: State};
 const doc = getYjsDoc(store);
 
-const rooms = new Map<string, WebsocketProvider>();
-
 
 export const connect = (roomId: string) => {
-    if (rooms.has(roomId)) {
-        return rooms.get(roomId)!;
-    }
     const conn = new WebsocketProvider('wss://demos.yjs.dev/ws', roomId, doc, );
-    rooms.set(roomId, conn);
     local.set("conn", conn);
 }
 

@@ -100,7 +100,6 @@ const actions: Events =  {
         store.state.context.currentDrawer = keys[index] as string;  
     },
     reset_players: () => {
-
         Object.keys(store.state.context.players).forEach((id) => {
             const player = store.state.context.players[id] as Player;
             player.guessed = false;

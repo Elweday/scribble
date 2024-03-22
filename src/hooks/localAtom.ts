@@ -5,15 +5,22 @@ interface Options {
     prefix: string;
 }
 
-export function storedAtom<T extends Record<string,any>>(initial: T, options?: Options){
+export function storedAtom<
+    T extends Record<string,any>,
+    K extends keyof T = keyof T
+>(initial: T, options?: {
+    prefix: string;
+    storedKeys?: K[]}){
+    const storedKeys = options?.storedKeys || Object.keys(initial) as K[];
     const prefix = options?.prefix || ""
     const atom = createAtom<T>(initial);
     
     onMount(atom, ()=>{
         if (typeof window === "undefined") return;
         const keys = Object.keys(atom.get());
-        keys.forEach((key)=>{
-            const saved = window.localStorage.getItem(prefix+key);
+        storedKeys.forEach((key)=>{
+            
+            const saved = window.localStorage.getItem(prefix+(key as string));
             let value = saved;
             if (saved) {
             try {
@@ -26,12 +33,12 @@ export function storedAtom<T extends Record<string,any>>(initial: T, options?: O
 
     atom.subscribe((obj)=>{
         if (typeof window === "undefined") return;
-        const keys = Object.keys(obj);
-        keys.forEach((key)=>{
-            let value = obj[key]
+        storedKeys.forEach((key)=>{
+            let value = obj[key] as any; 
             try {
                 value = JSON.stringify(obj[key])
             } catch {}
+            // @ts-ignore
             window.localStorage.setItem(prefix+key, value);
         })
     })
