@@ -1,6 +1,6 @@
 import { useSyncedStore, } from "@syncedstore/react";
 import { getRandomWords } from "./words";
-import { store, Events, Player, connect, local, Event, initialState, delays } from "~/constants/game";
+import { store, Events, Player, connect, local, Event, initialState, delays, ExtractPaload } from "~/constants/game";
 import { observeDeep } from "@syncedstore/core";
 
 function oneOf<T>(items: T[]){
@@ -212,18 +212,18 @@ const actions: Events =  {
 
 const send = (event: Event) => {
     const action = actions[event.type];
-
+    const { type, ...payload } = event; 
     if (!action) {
       throw new Error(`Unknown event type: ${event.type}`);
     }
-    console.log(event.type)
-    action({
-      // @ts-ignore
-      payload: event,
-    });
+    // @ts-ignore
+    action({ payload });
 }
 
-const waitFor = (delay: keyof typeof delays) => (cb: () => void) =>  setTimeout(cb, delays[delay])
+const waitFor = (delay: ((keyof typeof delays) | number) ) => {
+    const time = (typeof delay === "string") ? delays[delay] : delay;
+    return (cb: () => void) =>  setTimeout(cb, time)
+}
 
 const rules: Record<string, () => boolean> = {
     "ENSURE_PLAYERS_COUNT": () => {
@@ -257,12 +257,12 @@ const rules: Record<string, () => boolean> = {
     },
     "ENSURE_DESTROYED": () => {
         if (!is("has_players")) {
-            setTimeout(() => {
+            waitFor(5000)(()=>{
                 if (!is("has_players")) {
                     send({ type: "remove_room" });
                 }
-                return true
-            }, 5000)
+            })
+            return true
         }
         return false
     }

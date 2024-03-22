@@ -3,7 +3,6 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Avatar } from "./avatar";
 import { cn } from "~/utils/cn";
 import { useGameSyncedStore } from "~/data/gameStore";
-import { useEffect, useState } from "react";
 
 export default function Leaderboard() {
   const {state, send} = useGameSyncedStore();

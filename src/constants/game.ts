@@ -138,7 +138,7 @@ export type Event = (
 
 
 type EventName = Event["type"]
-type ExtractPaload<T extends EventName> = Omit<Extract<Event, { type: T }>, "type">;
+export type ExtractPaload<T extends EventName> = Omit<Extract<Event, { type: T }>, "type">;
 export type Events = Partial<{
     [K in EventName]: (
         cb: {
