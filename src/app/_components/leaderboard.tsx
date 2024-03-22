@@ -13,7 +13,8 @@ export default function Leaderboard() {
     const int = setInterval(() => {
       setSortedPlayers((players)=>{
         return players.map(([id, player]) => {
-          return player.increase >= 1 ? [id, { ...player, score: player.score + 1, increase: player.increase - 1 }] : [id, player]
+          return player.increase > 0 ?
+           [id, { ...player, score: player.score + 1, increase: player.increase - 1 }] : player.increase < 0 ? [id, { ...player, increase: player.increase + 1, score: player.score - 1 }] : [id, player]
         })
       })
     }, 1)

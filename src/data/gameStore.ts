@@ -80,6 +80,11 @@ const actions: Events =  {
             .sort(([__,  a], [_, b])=> ((a.timeStamp as number ) -( b.timeStamp as number)));
         const nguessers = guessers.length;
         const nplayers = players.length;
+        const ROUND_TIME = store.state.context.config.roundTime;
+        const BASE_SCORE = 100;
+        const THRESHOLD = 0.15;
+        const MAX_SCORE = 300;
+        const EXPONENT = Math.log(BASE_SCORE/MAX_SCORE) / -ROUND_TIME;
 
         
         if (nguessers === 0) {
@@ -87,12 +92,6 @@ const actions: Events =  {
             store.state.context.players[store.state.context.currentDrawer].increase = -BASE_SCORE;
             return;
         }
-
-        const ROUND_TIME = store.state.context.config.roundTime;
-        const BASE_SCORE = 100;
-        const THRESHOLD = 0.15;
-        const MAX_SCORE = 300;
-        const EXPONENT = Math.log(BASE_SCORE/MAX_SCORE) / -ROUND_TIME;
         guessers.forEach(([id, player], idx)=>{
             const weighted_time = (1-THRESHOLD) * store.state.context.config.roundTime;
             if (nguessers === 1 && nplayers > 1) {
