@@ -58,6 +58,7 @@ const actions: Events =  {
         store.state.context.currentDrawer = store.state.context.owner
         store.state.context.roundsLeft = store.state.context.config.rounds;
         store.state.context.remainingTime = store.state.context.config.roundTime;
+        Object.values(store.state.context.players).map(p => p.score = 0);
         repeat({
             run: ()=> send({ type: "decrement_time" }),
             every: 1000,
@@ -73,13 +74,14 @@ const actions: Events =  {
         store.state.value = "game.running"
     },
     update_scores: () => {
-        const guessers = Object.entries(store.state.context.players)
+        const players = Object.entries(store.state.context.players)
+        const guessers = players
             .filter(([id, player])=> player.guessed && (id !== store.state.context.currentDrawer))
             .sort(([__,  a], [_, b])=> ((a.timeStamp as number ) -( b.timeStamp as number)));
         const nguessers = guessers.length;
+        const nplayers = players.length;
         const THRESHOLD = 0.15;
         const MAX_SCORE = 400;
-
         guessers.forEach(([id, player], idx)=>{
             const weighted_time = (1-THRESHOLD) * store.state.context.config.roundTime;
             if (store.state.context.remainingTime >= weighted_time){
@@ -89,9 +91,8 @@ const actions: Events =  {
                 player.score += score;
             }
         });
-    
         // @ts-ignore
-        store.state.context.players[store.state.context.currentDrawer].score +=  BASE_SCORE * nguessers;
+        store.state.context.players[store.state.context.currentDrawer].score += nguessers/nplayers * MAX_SCORE ;
     },
     update_drawer: () => {
         const keys = Object.keys(store.state.context.players)
