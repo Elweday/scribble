@@ -3,10 +3,22 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Avatar } from "./avatar";
 import { cn } from "~/utils/cn";
 import { useGameSyncedStore } from "~/data/gameStore";
+import { useEffect, useState } from "react";
 
 export default function Leaderboard() {
   const {state, send} = useGameSyncedStore();
   const players = Object.entries(state.context?.players)
+  const [sortedPlayers, setSortedPlayers] = useState(players)
+  useEffect(() => {
+    const int = setInterval(() => {
+      setSortedPlayers((players)=>{
+        return players.map(([id, player]) => {
+          return player.increase >= 1 ? [id, { ...player, score: player.score + 1, increase: player.increase - 1 }] : [id, player]
+        })
+      })
+    }, 1)
+    return () => clearInterval(int)
+  }, [])
   return (
     <Dialog open={true}>
       <DialogContent className="z-[999] p-5 w-[80%] rounded bg-purple-950/80">
@@ -24,13 +36,21 @@ export default function Leaderboard() {
               </p>
 
             <div className="flex flex-wrap gap-2 justify-center">
-                {players.sort(([i1, a], [i2, b]) => b.score - a.score).map(([id, player], index) => (
+                {sortedPlayers.sort(([i1, a], [i2, b]) => b.score - a.score).map(([id, player], index) => (
                   <div className={cn("flex gap-3 place-items-center place-content-center text-center justify-center ", {
                   })} key={index}>
                     <span className="flex flex-col place-content-center ">
                       <Avatar size={"xl"}  rank={index + 1} avatar={player.avatar} />
                       <div className="flex place-items-center place-content-center">{player.name}</div>
-                     <span className=" text-lg font-bold">{player.score}</span>
+                      <div className="flex">
+                        <span className="text-xs  w-full">{player.score}</span>
+                        {player.increase !== 0 && (<span className={cn("text-xs w-full",  {
+                          "text-red-500": player.increase < 0,
+                          "text-green-500": player.increase > 0,
+                          "text-white": player.increase === 0
+                        })}>{ player.increase > 0 ? "+" : ""}{player.increase}</span> )}
+                      </div>
+
                     </span>
                     
                     </div>

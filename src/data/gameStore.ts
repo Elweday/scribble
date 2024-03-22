@@ -7,7 +7,6 @@ function oneOf<T>(items: T[]){
     return items[Math.floor(Math.random() * items.length)] as T; 
 }
 
-const BASE_SCORE = 50;
 
 type Guard = keyof ReturnType<typeof guards>;
 
@@ -59,6 +58,7 @@ const actions: Events =  {
         store.state.context.roundsLeft = store.state.context.config.rounds;
         store.state.context.remainingTime = store.state.context.config.roundTime;
         Object.values(store.state.context.players).map(p => p.score = 0);
+        store.state.context.guesses = []
         repeat({
             run: ()=> send({ type: "decrement_time" }),
             every: 1000,
@@ -73,26 +73,47 @@ const actions: Events =  {
         store.state.canvas = initialState.canvas
         store.state.value = "game.running"
     },
-    update_scores: () => {
-        const players = Object.entries(store.state.context.players)
+    calculate_increase: () => {
+        const players = Object.entries(store.state.context.players);
         const guessers = players
             .filter(([id, player])=> player.guessed && (id !== store.state.context.currentDrawer))
             .sort(([__,  a], [_, b])=> ((a.timeStamp as number ) -( b.timeStamp as number)));
         const nguessers = guessers.length;
         const nplayers = players.length;
+
+        
+        if (nguessers === 0) {
+            // @ts-ignore
+            store.state.context.players[store.state.context.currentDrawer].increase = -BASE_SCORE;
+            return;
+        }
+
+        const ROUND_TIME = store.state.context.config.roundTime;
+        const BASE_SCORE = 100;
         const THRESHOLD = 0.15;
-        const MAX_SCORE = 400;
+        const MAX_SCORE = 300;
+        const EXPONENT = Math.log(BASE_SCORE/MAX_SCORE) / -ROUND_TIME;
         guessers.forEach(([id, player], idx)=>{
             const weighted_time = (1-THRESHOLD) * store.state.context.config.roundTime;
-            if (store.state.context.remainingTime >= weighted_time){
-                player.score += MAX_SCORE
+            if (nguessers === 1 && nplayers > 1) {
+                player.increase = MAX_SCORE
+            } else if (store.state.context.remainingTime >= weighted_time){
+                player.increase = MAX_SCORE
             } else {
-                const score = Math.round(BASE_SCORE * Math.exp(-0.02 * (store.state.context.config.roundTime - store.state.context.remainingTime)));
-                player.score += score;
+                const elapsed = ROUND_TIME - store.state.context.remainingTime;
+                const score = Math.floor(BASE_SCORE * Math.exp(-EXPONENT * elapsed));
+                player.increase = score;
             }
         });
         // @ts-ignore
-        store.state.context.players[store.state.context.currentDrawer].score += nguessers/nplayers * MAX_SCORE ;
+        store.state.context.players[store.state.context.currentDrawer].increase = Math.floor(nguessers/nplayers * MAX_SCORE) ;
+    },
+    update_scores: () => {
+        Object.keys(store.state.context.players).forEach((id) => {
+            const player = store.state.context.players[id] as Player;
+            player.score += player.increase;
+            player.increase = 0;
+        })
     },
     update_drawer: () => {
         const keys = Object.keys(store.state.context.players)
@@ -113,10 +134,11 @@ const actions: Events =  {
         drawer.guessed = true;
     },
     end_round: () => {
-        send({ type: "update_scores" })
+        send({ type: "calculate_increase" })
         send({ type: "update_drawer" })
         send({ type: "reset_players" })
         waitFor("leaderboard")(()=>{
+            send({ type: "update_scores" })
             if (is("rounds_not_over")) {
                 send ({ type: "start_word_choosing" })
             } else {
@@ -139,7 +161,7 @@ const actions: Events =  {
     join: ({ payload })=>{
         local.set("id", payload.id);
         connect(payload.roomId);
-        store.state.context.players[payload.id] = { name: payload.name, avatar: payload.avatar, score: 0, guessed: false };
+        store.state.context.players[payload.id] = { name: payload.name, avatar: payload.avatar, score: 0, guessed: false, increase: 0 };
     },
     leave: ({ payload }) => {
         const id = local.get("id");
@@ -157,7 +179,7 @@ const actions: Events =  {
     guess: ({ payload }) => {
         const player = store.state.context.players[payload.id];
         if (!player) return;
-        const newGuess = {word: payload.word, id: payload.id};
+        const newGuess = {word: payload.word, id: payload.id, round:  store.state.context.config.rounds - store.state.context.roundsLeft, timestamp: store.state.context.remainingTime};
         store.state.context?.guesses.push(newGuess);
         const correct = store.state.context.currentWord === payload.word;
         if (!player.guessed && correct && store.state.context.players[payload.id]) {

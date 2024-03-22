@@ -70,12 +70,15 @@ type locale = typeof locales[number];
 type Guess = {
     word: string;
     id: string;
+    round: number;
+    timestamp: number;
 }
 
 export type Player = {
   name: string;
   avatar: AvatarName;
   score: number;
+  increase: number;
   guessed: boolean;  
   drawingRating?: number;
   timeStamp?: number;
@@ -130,6 +133,7 @@ export type Event = (
 | { type: "reset_players" }
 | { type: "create_room"; roomId: string; }
 | { type: "remove_room"; }
+| { type: "calculate_increase" }
 )
 
 
