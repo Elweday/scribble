@@ -8,18 +8,6 @@ import { useEffect, useState } from "react";
 export default function Leaderboard() {
   const {state, send} = useGameSyncedStore();
   const players = Object.entries(state.context?.players)
-  const [sortedPlayers, setSortedPlayers] = useState(players)
-  useEffect(() => {
-    const int = setInterval(() => {
-      setSortedPlayers((players)=>{
-        return players.map(([id, player]) => {
-          return player.increase > 0 ?
-           [id, { ...player, score: player.score + 1, increase: player.increase - 1 }] : player.increase < 0 ? [id, { ...player, increase: player.increase + 1, score: player.score - 1 }] : [id, player]
-        })
-      })
-    }, 1)
-    return () => clearInterval(int)
-  }, [])
   return (
     <Dialog open={true}>
       <DialogContent className="z-[999] p-5 w-[80%] rounded bg-purple-950/80">
@@ -37,7 +25,7 @@ export default function Leaderboard() {
               </p>
 
             <div className="flex flex-wrap gap-2 justify-center">
-                {sortedPlayers.sort(([i1, a], [i2, b]) => b.score - a.score).map(([id, player], index) => (
+                {players.sort(([i1, a], [i2, b]) => b.score - a.score).map(([id, player], index) => (
                   <div className={cn("flex gap-3 place-items-center place-content-center text-center justify-center ", {
                   })} key={index}>
                     <span className="flex flex-col place-content-center ">

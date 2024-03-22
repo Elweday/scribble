@@ -16,13 +16,13 @@ const is = (guard: Guard) => {
     return cond ? cond() : false
 };
 
-function repeat(params: {run: () => void, every: number, untill: Guard}){
+function repeat(params: {run: () => void, every: number, untill: Guard, delay?: number}) {
     setTimeout(() => {
         if (!is(params.untill)) {
             params.run();
-            repeat(params)
+            repeat({...params, delay: undefined})
         }
-    }, params.every)
+    }, params.delay || params.every)
 }
 
 const guards = (state: typeof store.state) => ({
@@ -42,7 +42,8 @@ const guards = (state: typeof store.state) => ({
     "room_not_full": () => Object.keys(state.context.players).length >= state.context.config.maxPlayers,
     "has_owner" : () => state.context.owner !== "",
     "word_choosing_ruuning": () => state.context.word_choosing_time > 0,
-    "game_over": () => state.value === "done"
+    "game_over": () => state.value === "done",
+    "owner_in_room": () =>  Object.keys(state.context.players).includes(state.context.owner),
 }) as const; 
 
 
@@ -52,6 +53,7 @@ const actions: Events =  {
         store.state.context.owner = local.get("id");
         local.set("error", null); 
     },
+
     start_game: ({ payload }) => {
         store.state.context.gameId = payload.gameId
         store.state.context.currentDrawer = store.state.context.owner
@@ -108,12 +110,12 @@ const actions: Events =  {
         store.state.context.players[store.state.context.currentDrawer].increase = Math.floor(nguessers/nplayers * MAX_SCORE) ;
     },
     update_scores: () => {
-        Object.keys(store.state.context.players).forEach((id) => {
-            const player = store.state.context.players[id] as Player;
-            player.score += player.increase;
-            player.increase = 0;
+        Object.values(store.state.context.players).forEach((p) => {
+            const unit = p.increase > 0 ? 1 : (p.increase < 0) ? -1 : 0;
+            p.increase -= unit
+            p.score += unit
         })
-    },
+},
     update_drawer: () => {
         const keys = Object.keys(store.state.context.players)
         const drawerIndex = keys.findIndex((id)=>id === store.state.context.currentDrawer);
@@ -136,13 +138,14 @@ const actions: Events =  {
         send({ type: "calculate_increase" })
         send({ type: "update_drawer" })
         send({ type: "reset_players" })
+        repeat({
+            run: () => send({ type: "update_scores" }),
+            every: 20,
+            untill: "word_choosing_ruuning",
+            delay: 1000
+        })
         waitFor("leaderboard")(()=>{
-            send({ type: "update_scores" })
-            if (is("rounds_not_over")) {
-                send ({ type: "start_word_choosing" })
-            } else {
-                send ({ type: "end_game" })
-            }
+            send ({ type: is("rounds_not_over") ? "start_word_choosing" : "end_game" })
         })
         store.state.value = "game.round_ended";
         store.state.context.roundsLeft -= 1;
@@ -231,7 +234,7 @@ const rules: Record<string, () => boolean> = {
         return false
     },
     "ENSURE_OWNER": () => {
-        if (!is("has_owner") && is("has_players")) {
+        if (is("has_players") && (!is("has_owner") || !is("owner_in_room") )) {
             store.state.context.owner = Object.keys(store.state.context.players)[0] as string;
             return true
         }
